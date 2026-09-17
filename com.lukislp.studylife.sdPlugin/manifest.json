@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Name": "StudyLife",
+  "Version": "1.0.0.0",
+  "Author": "lukislp",
+  "Description": "Control your StudyLife focus timer and see study status from physical Stream Deck keys.",
+  "Icon": "imgs/plugin-icon",
+  "CategoryIcon": "imgs/category-icon",
+  "Category": "StudyLife",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/property-inspector.html",
+  "UUID": "com.lukislp.studylife",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "20"
+  },
+  "Actions": [
+    {
+      "Name": "Focus Timer",
+      "UUID": "com.lukislp.studylife.timer",
+      "Icon": "imgs/actions/timer/icon",
+      "Tooltip": "Tap to start/pause/resume the shared StudyLife focus timer; hold to stop it.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/timer/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
+    },
+    {
+      "Name": "Study Status",
+      "UUID": "com.lukislp.studylife.status",
+      "Icon": "imgs/actions/status/icon",
+      "Tooltip": "Shows this week's study hours and your streak; press to refresh immediately.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/status/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
+    }
+  ]
+}

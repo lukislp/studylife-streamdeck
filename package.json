@@ -1,0 +1,36 @@
+{
+  "name": "studylife-streamdeck",
+  "description": "Elgato Stream Deck plugin for StudyLife: control the focus timer and see study status from physical keys.",
+  "version": "1.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukislp/studylife-streamdeck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lukislp/studylife-streamdeck/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "package": "npx --yes @elgato/cli@1.9.0 pack com.lukislp.studylife.sdPlugin -o . -f --no-update-check"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^2.1.2"
+  },
+  "devDependencies": {
+    "@elgato/cli": "^1.9.0",
+    "@semantic-release/exec": "^7.1.0",
+    "@types/node": "^26.6.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

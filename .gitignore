@@ -1,0 +1,5 @@
+node_modules/
+dist/
+com.lukislp.studylife.sdPlugin/bin/
+*.streamDeckPlugin
+coverage/
