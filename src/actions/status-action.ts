@@ -7,7 +7,7 @@ import streamDeck, {
   action,
   type DialAction,
   type KeyAction,
-  KeyDownEvent,
+  KeyUpEvent,
   SingletonAction,
   WillAppearEvent,
   WillDisappearEvent,
@@ -37,7 +37,10 @@ export class StudyStatusAction extends SingletonAction {
     this.pollers.delete(ev.action.id);
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+  // onKeyUp, not onKeyDown: matches the Stream Deck press convention the Focus Timer action
+  // already follows (see timer-action.ts) - triggering on release, not on press, is what lets a
+  // user cancel a press by dragging off the key before releasing.
+  override async onKeyUp(ev: KeyUpEvent): Promise<void> {
     await this.refresh(ev.action);
   }
 
