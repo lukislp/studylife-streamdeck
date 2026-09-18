@@ -105,6 +105,7 @@
     <div id="courseSection" style="display: none">
       <label id="courseLabel" for="courseId">Course</label>
       <select id="courseId"></select>
+      <p id="courseError" class="hint" style="display: none; color: #e57373"></p>
     </div>
 
     <hr />
@@ -193,6 +194,9 @@
         const select = document.getElementById("courseId");
         populateCourseSelect(select, payload.goals, actionUuid !== COURSEGOAL_ACTION);
         applySettingsToFields();
+        const errorEl = document.getElementById("courseError");
+        errorEl.textContent = payload.error || "";
+        errorEl.style.display = payload.error ? "block" : "none";
       }
 
       function applySettingsToFields() {
@@ -239,7 +243,16 @@
 
       document.getElementById("connect").addEventListener("click", () => {
         const instanceUrl = document.getElementById("instanceUrl").value.trim();
-        document.getElementById("status").textContent = "Opening browser to approve...";
+        // Disabled immediately, not just once the eventual "status" reply re-renders the button -
+        // the round trip (open the browser, wait for the approval) can take a while, and without
+        // this an impatient repeat click starts another concurrent login attempt on a different
+        // loopback port, which is confusing at best (multiple browser tabs) and can leave the
+        // plugin connected with whichever attempt's key happened to land last.
+        const connectButton = document.getElementById("connect");
+        connectButton.disabled = true;
+        const statusEl = document.getElementById("status");
+        statusEl.className = "";
+        statusEl.textContent = "Opening browser to approve...";
         sendToPlugin({ event: "connect", instanceUrl });
       });
 
