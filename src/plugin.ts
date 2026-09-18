@@ -54,6 +54,18 @@ interface PiCourses {
   [key: string]: string | UpcomingGoal[] | undefined;
 }
 
+/**
+ * Tracks a login already under way so a second "connect" - whether a repeat click on the same
+ * Property Inspector or a click on a *different* key's PI while the first is still waiting on the
+ * browser - reuses it instead of starting a second, fully independent runLogin() on another
+ * loopback port. Without this, two concurrent flows each open their own browser tab, and which
+ * one the user happens to approve decides the outcome unpredictably - confusing at best, and it
+ * reads as "only some keys connected" once the PIs that were open for the *other* attempt never
+ * see a resolution. Assumes both attempts target the same instance URL, which is the case unless
+ * the user changes it mid-flight - an edge case not worth complicating this for.
+ */
+let loginInFlight: Promise<string> | undefined;
+
 streamDeck.ui.onSendToPlugin<PiMessage>(async (ev) => {
   const message = ev.payload;
   if (message.event === "getStatus") {
@@ -80,7 +92,10 @@ streamDeck.ui.onSendToPlugin<PiMessage>(async (ev) => {
       return;
     }
     try {
-      const apiKey = await runLogin(message.instanceUrl, DEFAULT_CLIENT_ID);
+      const login = (loginInFlight ??= runLogin(message.instanceUrl, DEFAULT_CLIENT_ID).finally(() => {
+        loginInFlight = undefined;
+      }));
+      const apiKey = await login;
       await storeConnection(message.instanceUrl, apiKey);
       await sendStatus();
     } catch (error) {
@@ -126,10 +141,11 @@ async function sendCourses(): Promise<void> {
     } satisfies PiCourses);
   } catch (error) {
     streamDeck.logger.error("Property inspector getCourses failed", error);
+    const text = error instanceof Error ? error.message : "Could not load courses - see the plugin log.";
     await streamDeck.ui.sendToPropertyInspector({
       event: "courses",
       goals: [],
-      error: "Could not load courses - see the plugin log.",
+      error: text,
     } satisfies PiCourses);
   }
 }

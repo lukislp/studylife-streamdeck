@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { courseGoalKeyTitle, formatDue, statusKeyTitle, switchCourseKeyTitle, timerKeyTitle } from "../src/render.js";
+import {
+  courseGoalKeyTitle,
+  focusModeKeyTitle,
+  formatDue,
+  statusKeyTitle,
+  switchCourseKeyTitle,
+  timerKeyTitle,
+  wrapTitle,
+} from "../src/render.js";
 import type { TimerState } from "../src/timer.js";
 
 const NOW = Date.parse("2026-09-16T12:00:00.000Z");
@@ -107,6 +115,31 @@ describe("courseGoalKeyTitle", () => {
     const goal = { courseId: 1, courseName: "Biology", targetDate: "2026-10-01T00:00:00", daysLeft: 3 };
     expect(courseGoalKeyTitle({ connected: true, configured: true, goal })).toBe("Biology\nin 3 days");
   });
+
+  it("wraps a course name too long for one line instead of overflowing the key", () => {
+    const goal = {
+      courseId: 1,
+      courseName: "Object-Oriented Programming",
+      targetDate: "2026-10-01T00:00:00",
+      daysLeft: 3,
+    };
+    expect(courseGoalKeyTitle({ connected: true, configured: true, goal })).toBe(
+      "Object-Oriented\nProgramming\nin 3 days",
+    );
+  });
+
+  it("ellipsises a course name that still would not fit in two wrapped lines", () => {
+    const goal = {
+      courseId: 1,
+      courseName: "Projekt Objektorientierte und funktionale Programmierung mit Python",
+      targetDate: "2026-10-01T00:00:00",
+      daysLeft: 3,
+    };
+    const title = courseGoalKeyTitle({ connected: true, configured: true, goal });
+    expect(title.split("\n")).toHaveLength(3);
+    expect(title).toContain("…");
+    expect(title.endsWith("in 3 days")).toBe(true);
+  });
 });
 
 describe("switchCourseKeyTitle", () => {
@@ -120,5 +153,55 @@ describe("switchCourseKeyTitle", () => {
 
   it("shows a fallback when nothing is currently selected", () => {
     expect(switchCourseKeyTitle({ connected: true })).toBe("No course");
+  });
+
+  it("wraps a course name too long for one line instead of overflowing the key", () => {
+    expect(switchCourseKeyTitle({ connected: true, courseName: "Object-Oriented Programming" })).toBe(
+      "Object-Oriented\nProgramming",
+    );
+  });
+});
+
+describe("focusModeKeyTitle", () => {
+  it("shows a not-connected title first", () => {
+    expect(focusModeKeyTitle({ connected: false, modeId: 1 })).toBe("Not\nconnected");
+  });
+
+  it("shows an unknown-mode fallback for a custom (non-built-in) mode id", () => {
+    expect(focusModeKeyTitle({ connected: true, modeId: 100 })).toBe("Unknown\nmode");
+  });
+
+  it("wraps every built-in preset's two-word name onto its own two lines, plus focus/break", () => {
+    expect(focusModeKeyTitle({ connected: true, modeId: 1 })).toBe("Pomodoro\nClassic\n25m/5m");
+    expect(focusModeKeyTitle({ connected: true, modeId: 6 })).toBe("Micro\nFocus\n5m/1m");
+    expect(focusModeKeyTitle({ connected: true, modeId: 9 })).toBe("Marathon\nSession\n180m/30m");
+  });
+
+  it("keeps a short enough name on one line rather than wrapping needlessly", () => {
+    expect(focusModeKeyTitle({ connected: true, modeId: 8 })).toBe("Deep Dive\n120m/20m");
+  });
+});
+
+describe("wrapTitle", () => {
+  it("returns the text unwrapped when it already fits", () => {
+    expect(wrapTitle("Biology", 9)).toEqual(["Biology"]);
+  });
+
+  it("wraps at word boundaries, never mid-word", () => {
+    expect(wrapTitle("Micro Focus", 9)).toEqual(["Micro", "Focus"]);
+  });
+
+  it("keeps a single word longer than the limit whole rather than splitting it", () => {
+    expect(wrapTitle("Objektorientierte", 9)).toEqual(["Objektorientierte"]);
+  });
+
+  it("folds extra lines into the last kept one with an ellipsis when maxLines is exceeded", () => {
+    const lines = wrapTitle("Projekt Objektorientierte und funktionale Programmierung", 9, 2);
+    expect(lines).toHaveLength(2);
+    expect(lines[1]?.endsWith("…")).toBe(true);
+  });
+
+  it("does not truncate when the wrapped text already fits within maxLines", () => {
+    expect(wrapTitle("Micro Focus", 9, 3)).toEqual(["Micro", "Focus"]);
   });
 });
