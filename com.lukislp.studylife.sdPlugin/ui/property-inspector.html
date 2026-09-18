@@ -156,9 +156,9 @@
         };
         websocket.onmessage = (ev) => {
           const message = JSON.parse(ev.data);
-          if (message.event === "sendToPlugin" && message.payload && message.payload.event === "status") {
+          if (message.event === "sendToPropertyInspector" && message.payload && message.payload.event === "status") {
             renderStatus(message.payload);
-          } else if (message.event === "sendToPlugin" && message.payload && message.payload.event === "courses") {
+          } else if (message.event === "sendToPropertyInspector" && message.payload && message.payload.event === "courses") {
             renderCourseOptions(message.payload);
           } else if (message.event === "didReceiveSettings") {
             currentSettings = (message.payload && message.payload.settings) || {};
