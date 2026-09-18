@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.2...v1.3.3) (2026-09-18)
+
+
+### Bug Fixes
+
+* repaint the key's indigo background on every dynamic key image ([#10](https://github.com/lukislp/studylife-streamdeck/issues/10)) ([dda6dab](https://github.com/lukislp/studylife-streamdeck/commit/dda6dabb815446e133d079e9fbfc1d7d67cec1dd))
+
 ## [1.3.2](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.1...v1.3.2) (2026-09-18)
 
 
