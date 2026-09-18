@@ -18,6 +18,7 @@
   "scripts": {
     "build": "node build.mjs",
     "watch": "node build.mjs --watch",
+    "icons": "node scripts/render-icons.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "package": "npx --yes @elgato/cli@1.9.0 pack com.lukislp.studylife.sdPlugin -o . -f --no-update-check"
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@elgato/cli": "^1.9.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@semantic-release/exec": "^7.1.0",
     "@types/node": "^26.6.1",
     "esbuild": "^0.28.2",

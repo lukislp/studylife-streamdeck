@@ -15,10 +15,14 @@ Deck keys - and, on Stream Deck +, its dials - the same shared timer as the web 
 **Focus Timer key** - a single key that cycles through the timer: tap to start, tap again to
 pause, tap again to resume; hold the key to stop. The key's title updates live with the phase and
 a countdown while it is visible on a device, by polling `TimerState.Get` every 5 seconds; when
-idle it shows this week's hours instead of sitting blank. Optionally bind this specific key
-instance to one course in its Property Inspector; when unset it falls back to whatever the
-**Switch Course** key currently has selected, and when that is unset too the timer still
-starts/stops normally, it just does not book a session.
+idle it shows this week's hours instead of sitting blank. The key face also renders a live
+circular progress ring behind the title: full while idle it shows a calm empty outline, while
+running it fills clockwise with the current phase's real elapsed fraction, and for a custom timer
+mode (id ≥ 100, whose total length this plugin cannot read) it shows an explicitly indeterminate
+rotating segment rather than a fabricated percentage - see "Real icon artwork and dynamic key
+images" below. Optionally bind this specific key instance to one course in its Property Inspector;
+when unset it falls back to whatever the **Switch Course** key currently has selected, and when
+that is unset too the timer still starts/stops normally, it just does not book a session.
 
 When a run this plugin started (not one already attached to a planned session) is stopped and
 lasted at least 10 seconds, it is automatically logged as a study session via `Sessions.Create` -
@@ -31,7 +35,10 @@ quietly disagree with the web app.
 
 **Course Goal key** - a per-key countdown to one specific open course goal, picked once in its
 Property Inspector from your currently open goals. Pin several of these to different physical
-keys to see several course deadlines side by side.
+keys to see several course deadlines side by side. The key face also renders a small countdown
+badge with the actual day count, colored a neutral indigo normally and shifting to a warning
+color once the goal is due today or overdue - see "Real icon artwork and dynamic key images"
+below for why this is a day count, not a fabricated completion percentage.
 
 **Quick Note key** - a press saves a *preset* note (written once in the Property Inspector, not
 typed per press - Stream Deck hardware has no keyboard) via `Notes.Create`, optionally tagged with
@@ -115,6 +122,54 @@ goals (`StudyMetrics.CalcUpcomingCourseGoals`). This plugin does not request `Co
 or any other scope to lift that cap - it is a deliberate, explicit product decision shared across
 every StudyLife client, not a limitation of this one.
 
+### Real icon artwork and dynamic key images
+
+Every action icon and key face is real, hand-drawn artwork sharing one visual language - the
+same brand indigo (`#4F46E5`) fill, white glyphs, consistent stroke widths - rather than the flat
+placeholder-color squares earlier versions shipped. The source of truth is a set of plain SVG
+glyphs under `assets/icons/`; `npm run icons` (backed by `scripts/render-icons.mjs` and
+`@resvg/resvg-js`, a build-time-only dependency never bundled into the runtime plugin) rasterizes
+each one to every PNG size Stream Deck needs. Changing the look of an action means editing its
+SVG and re-running that script, never hand-editing a PNG.
+
+Two keys go further and render a *dynamic* image on top of that static art while they are visible,
+via `action.setImage()` with an inline `data:image/svg+xml;base64,...` URI (Stream Deck's own
+software renders SVG directly, so no rasterizer is needed at runtime for this):
+
+- **Focus Timer** draws a circular progress ring (`src/progressRing.ts`) from timer.ts's
+  `progress()` fraction. Stopped is its own calm outline ring, a running built-in mode fills
+  clockwise with the real elapsed fraction, and a running *custom* mode (id ≥ 100, whose total
+  length this plugin has no scope to read) shows a short rotating segment rather than guessing a
+  percentage - the same "never fabricate a number you can't honestly compute" rule `timer.ts`'s
+  `durationMinutes` and `render.ts`'s `timerKeyTitle` already apply to the text rendering.
+- **Course Goal** draws a countdown badge (`src/countdownBadge.ts`) showing the goal's actual
+  `daysLeft`, colored a neutral indigo normally and a warning red once it is due today or
+  overdue. `Metrics.GetSummary` gives a target date and days-left, never a start date, so there is
+  no honest way to compute a completion fraction the way Focus Timer's ring can - a real day
+  count is the honest visual here, not an invented progress bar.
+
+Both are plain, dependency-free string builders with no Stream Deck SDK or DOM involved, so they
+are unit-tested directly (`tests/progressRing.test.ts`, `tests/countdownBadge.test.ts`), the same
+pure/tested split `render.ts`, `courseCycle.ts` and `noteTitle.ts` already use. Study Status,
+Quick Note, Switch Course and Focus Mode keep clean text titles for now - their data does not back
+an equally honest visual, so this stays scoped to the two cases above rather than inventing one.
+
+### Multi-Action support
+
+None of the six actions set `SupportedInMultiActions: false` in `manifest.json`, so every one of
+them already works inside Stream Deck's own native Multi-Action feature - chaining several
+actions onto a single key press - with no plugin code needed for it. A couple of chains worth
+setting up:
+
+- **Switch Course → Focus Timer**: cycle the plugin-wide current course to the one you want, then
+  start the timer, both from one press - useful when Focus Timer's own key has no course bound
+  and you want a single key per course anyway.
+- **Switch Course → Quick Note**: tag a quick note to a specific course without first pressing a
+  separate Switch Course key.
+
+To set one up: add a Multi-Action key in the Stream Deck app, drag the actions onto it in order,
+and configure each one's own settings exactly as you would standalone.
+
 ### No webhook management here
 
 This plugin does not manage StudyLife webhook subscriptions. A physical-button CRUD surface for
@@ -180,19 +235,20 @@ selections you explicitly create or pick.
 npm install
 npm run typecheck
 npm test
+npm run icons       # regenerate every action/key/plugin PNG from assets/icons/*.svg
 npm run build      # bundle src/plugin.ts into com.lukislp.studylife.sdPlugin/bin/plugin.js
 npm run package     # produce the .streamDeckPlugin
 npx @elgato/cli validate com.lukislp.studylife.sdPlugin   # manifest/PI/image checks
 ```
 
 The modules without a Stream Deck connection (`oauth.ts`, `timer.ts`, `render.ts`, `runLog.ts`,
-`history.ts`, `berlinTime.ts`, `courseCycle.ts`, `noteTitle.ts`, the pure helpers in `api.ts`) hold
-the rules that are easy to get subtly wrong, and those are what the tests cover - PKCE shape,
-constant-time state comparison, callback parsing, the timer transitions, the key-title rendering
-rules, the run-to-session decision, today's-hours summation, Europe/Berlin wall-clock construction
-and the Switch Course cycling order. `auth.ts`, `settings.ts`, `metricsCache.ts` and
-`src/actions/*.ts` keep the SDK-facing half separate precisely so the rest can be tested without a
-device.
+`history.ts`, `berlinTime.ts`, `courseCycle.ts`, `noteTitle.ts`, `progressRing.ts`,
+`countdownBadge.ts`, `svgImage.ts`, the pure helpers in `api.ts`) hold the rules that are easy to
+get subtly wrong, and those are what the tests cover - PKCE shape, constant-time state comparison,
+callback parsing, the timer transitions, the key-title and key-image rendering rules, the
+run-to-session decision, today's-hours summation, Europe/Berlin wall-clock construction and the
+Switch Course cycling order. `auth.ts`, `settings.ts`, `metricsCache.ts` and `src/actions/*.ts`
+keep the SDK-facing half separate precisely so the rest can be tested without a device.
 
 `timer.ts` is worth reading before changing anything about the timer. The wire shape has no
 "paused" flag, and the server accepts unknown JSON properties silently - so a wrong field name

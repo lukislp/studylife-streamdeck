@@ -14,6 +14,7 @@ import streamDeck, {
   WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { StudyLifeApi } from "../api.js";
+import { countdownBadgeDataUri } from "../countdownBadge.js";
 import { nextCourse } from "../courseCycle.js";
 import { getCachedMetrics } from "../metricsCache.js";
 import { courseGoalKeyTitle } from "../render.js";
@@ -76,6 +77,9 @@ export class CourseGoalAction extends SingletonAction<CourseGoalSettings> {
     const global = await readSettings();
     if (!global.instanceUrl || !global.apiKey) {
       await target.setTitle(courseGoalKeyTitle({ connected: false, configured: false }));
+      // No goal at all yet - revert to the manifest's plain key art rather than leaving a
+      // stale badge from whatever goal was last bound.
+      await target.setImage();
       return;
     }
     const api = new StudyLifeApi(global.instanceUrl, global.apiKey);
@@ -86,6 +90,10 @@ export class CourseGoalAction extends SingletonAction<CourseGoalSettings> {
       await target.setTitle(
         courseGoalKeyTitle({ connected: true, configured: settings.courseId !== undefined, goal }),
       );
+      // Only a found, open goal has an honest daysLeft to badge - see countdownBadge.ts's file
+      // header for why this is a day count, never a fabricated completion percentage. Unset or
+      // no-longer-open reverts to the plain manifest key art instead of a stale badge.
+      await target.setImage(goal === undefined ? undefined : countdownBadgeDataUri({ daysLeft: goal.daysLeft }));
     } catch (error) {
       streamDeck.logger.error("Course Goal: refresh failed", error);
       await target.showAlert();

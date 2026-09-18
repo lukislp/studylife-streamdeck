@@ -109,6 +109,26 @@ export function remainingMs(state: TimerState | undefined, now: number): number 
   return Math.max(0, ends - now);
 }
 
+/**
+ * Fraction of the current phase elapsed, from 0 (just started) to 1 (about to end) - undefined
+ * whenever there is no honest way to compute one: nothing running (see remainingMs), or a custom
+ * mode whose total length this plugin cannot read (id >= 100, see durationMinutes). Deliberately
+ * never estimated from wall-clock time alone or guessed at a round number - without a known total
+ * there is no fraction to report, so callers (progressRing.ts) render an explicitly indeterminate
+ * visual instead of inventing one, the same discipline durationMinutes/timerKeyTitle already
+ * apply to the text rendering.
+ */
+export function progress(state: TimerState | undefined, now: number): number | undefined {
+  const remaining = remainingMs(state, now);
+  if (remaining === undefined) return undefined;
+  const totalMinutes = durationMinutes(state);
+  if (totalMinutes === undefined) return undefined;
+  const totalMs = totalMinutes * 60_000;
+  if (totalMs <= 0) return undefined;
+  const elapsed = totalMs - remaining;
+  return Math.min(1, Math.max(0, elapsed / totalMs));
+}
+
 /** "24:13" - a countdown, unlike a plain duration string. */
 export function formatCountdown(ms: number): string {
   const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
