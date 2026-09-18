@@ -1,7 +1,9 @@
-// Course Goal key: a per-key countdown to one specific open course goal, picked once in the
-// Property Inspector from metrics.upcomingCourseGoals (see api.ts's file header for why that
-// list, not a separate CourseGoals.GetAll call, is "the courses worth offering"). Lets someone
-// pin several different course-goal countdowns to different physical keys side by side.
+// Course Goal key: a per-key countdown to one specific open course goal, from
+// metrics.upcomingCourseGoals (see api.ts's file header for why that list, not a separate
+// CourseGoals.GetAll call, is "the courses worth offering"). Lets someone pin several different
+// course-goal countdowns to different physical keys side by side. Bindable either from the
+// Property Inspector's dropdown or by pressing the key itself, which cycles to the next goal -
+// see onKeyUp.
 import streamDeck, {
   action,
   type DialAction,
@@ -12,6 +14,7 @@ import streamDeck, {
   WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { StudyLifeApi } from "../api.js";
+import { nextCourse } from "../courseCycle.js";
 import { getCachedMetrics } from "../metricsCache.js";
 import { courseGoalKeyTitle } from "../render.js";
 import { readSettings } from "../settings.js";
@@ -42,7 +45,29 @@ export class CourseGoalAction extends SingletonAction<CourseGoalSettings> {
     this.pollers.delete(ev.action.id);
   }
 
+  /**
+   * A press cycles this key's own bound course through the open goals (same wraparound as
+   * Switch Course's nextCourse), so the key can be configured entirely from the hardware -
+   * useful on a device without an open Property Inspector handy, and the PI's course dropdown
+   * (once open) reflects the change immediately via Stream Deck's own didReceiveSettings push.
+   */
   override async onKeyUp(ev: KeyUpEvent<CourseGoalSettings>): Promise<void> {
+    const global = await readSettings();
+    if (!global.instanceUrl || !global.apiKey) {
+      await ev.action.showAlert();
+      return;
+    }
+    const api = new StudyLifeApi(global.instanceUrl, global.apiKey);
+    try {
+      const settings = await ev.action.getSettings();
+      const metrics = await getCachedMetrics(api, Date.now());
+      const goal = nextCourse(metrics.upcomingCourseGoals ?? [], settings.courseId);
+      await ev.action.setSettings(goal === undefined ? {} : { courseId: goal.courseId });
+    } catch (error) {
+      streamDeck.logger.error("Course Goal: press failed", error);
+      await ev.action.showAlert();
+      return;
+    }
     await this.refresh(ev.action);
   }
 
