@@ -1,8 +1,8 @@
-// Study Status key: shows this week's hours and streak from Metrics.GetSummary, refreshed
-// periodically while visible, with an immediate refresh on a press. Every number comes from
-// StudyLife's own metrics endpoint - the single place those are calculated (see MetricsController)
-// - so this key can never quietly disagree with the web app, exactly like studylife-vscode's
-// status bar.
+// Study Status key: shows this week's and today's hours plus streak from Metrics.GetSummary and
+// Sessions.GetHistory, refreshed periodically while visible, with an immediate refresh on a
+// press. Every number comes from StudyLife's own metrics/history endpoints - the single place
+// those are calculated (see MetricsController, SessionsController) - so this key can never
+// quietly disagree with the web app, exactly like studylife-vscode's status bar.
 import streamDeck, {
   action,
   type DialAction,
@@ -12,7 +12,9 @@ import streamDeck, {
   WillAppearEvent,
   WillDisappearEvent,
 } from "@elgato/streamdeck";
-import { StudyLifeApi, openGoalCount } from "../api.js";
+import { openGoalCount, StudyLifeApi } from "../api.js";
+import { sumTodayHours } from "../history.js";
+import { getCachedMetrics } from "../metricsCache.js";
 import { statusKeyTitle } from "../render.js";
 import { readSettings } from "../settings.js";
 
@@ -53,8 +55,16 @@ export class StudyStatusAction extends SingletonAction {
     }
     const api = new StudyLifeApi(settings.instanceUrl, settings.apiKey);
     try {
-      const [metrics, goals] = await Promise.all([api.getMetricsSummary(), api.getCourseGoals()]);
-      await target.setTitle(statusKeyTitle({ connected: true, metrics, openGoals: openGoalCount(goals) }));
+      const now = Date.now();
+      const [metrics, history] = await Promise.all([getCachedMetrics(api, now), api.getTodayHistory()]);
+      await target.setTitle(
+        statusKeyTitle({
+          connected: true,
+          metrics,
+          todayHours: sumTodayHours(history, now),
+          openGoals: openGoalCount(metrics.upcomingCourseGoals),
+        }),
+      );
     } catch (error) {
       streamDeck.logger.error("Study Status: refresh failed", error);
       await target.showAlert();
