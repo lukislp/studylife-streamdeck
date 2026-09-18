@@ -48,13 +48,61 @@
       "Name": "Study Status",
       "UUID": "com.lukislp.studylife.status",
       "Icon": "imgs/actions/status/icon",
-      "Tooltip": "Shows this week's study hours and your streak; press to refresh immediately.",
+      "Tooltip": "Shows this week's and today's study hours plus your streak; press to refresh immediately.",
       "Controllers": [
         "Keypad"
       ],
       "States": [
         {
           "Image": "imgs/actions/status/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
+    },
+    {
+      "Name": "Course Goal",
+      "UUID": "com.lukislp.studylife.coursegoal",
+      "Icon": "imgs/actions/coursegoal/icon",
+      "Tooltip": "Shows one open course goal's countdown; pick the course in this key's Property Inspector.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/coursegoal/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
+    },
+    {
+      "Name": "Quick Note",
+      "UUID": "com.lukislp.studylife.quicknote",
+      "Icon": "imgs/actions/quicknote/icon",
+      "Tooltip": "Saves a preset note (written once in the Property Inspector) with one press, optionally tagged with a course.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/quicknote/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
+    },
+    {
+      "Name": "Switch Course",
+      "UUID": "com.lukislp.studylife.switchcourse",
+      "Icon": "imgs/actions/switchcourse/icon",
+      "Tooltip": "Cycles the plugin-wide current course used by Focus Timer and Quick Note keys with no course of their own.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/switchcourse/key",
           "TitleAlignment": "middle",
           "FontSize": 13
         }
