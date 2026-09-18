@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.3...v1.3.4) (2026-09-18)
+
+
+### Bug Fixes
+
+* stop double-rendering white text/icons over each other on key faces ([#11](https://github.com/lukislp/studylife-streamdeck/issues/11)) ([599f02d](https://github.com/lukislp/studylife-streamdeck/commit/599f02d413ad70e6212a378d04955173f7f2dd69))
+
 ## [1.3.3](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.2...v1.3.3) (2026-09-18)
 
 
