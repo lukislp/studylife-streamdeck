@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.3...v1.3.0) (2026-09-18)
+
+
+### Features
+
+* real icon artwork and dynamic key images for Focus Timer and Course Goal ([#7](https://github.com/lukislp/studylife-streamdeck/issues/7)) ([9ae5c12](https://github.com/lukislp/studylife-streamdeck/commit/9ae5c120fca4c98f3c080d08c072c9b7911e05d4))
+
 ## [1.2.3](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.2...v1.2.3) (2026-09-18)
 
 
