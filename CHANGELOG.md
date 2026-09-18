@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.0.1...v1.1.0) (2026-09-18)
+
+
+### Features
+
+* v2 - session booking, Course Goal, Quick Note, Switch Course ([#2](https://github.com/lukislp/studylife-streamdeck/issues/2)) ([f7edbae](https://github.com/lukislp/studylife-streamdeck/commit/f7edbaeb231a4045ee44664d386e7db4ac7ee877))
+
 ## [1.0.1](https://github.com/lukislp/studylife-streamdeck/compare/v1.0.0...v1.0.1) (2026-09-17)
 
 
