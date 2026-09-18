@@ -46,10 +46,21 @@ function glyphInnerMarkup(name) {
   return match[1].trim();
 }
 
+/**
+ * Recolors a glyph written with white (#FFFFFF) shapes - every hand-written glyph under
+ * assets/icons/ uses white so it previews sensibly on its own, and so indigoSvg() below can use
+ * it unmodified against the indigo key/plugin-icon background it composes onto.
+ */
+function withColor(glyphMarkup, color) {
+  return glyphMarkup.replace(/#FFFFFF/gi, color);
+}
+
 /** A transparent-background icon document - used for the tiny action-list icon and the category
- *  icon, both shown over Stream Deck's own dark UI chrome. */
+ *  icon. Stream Deck's own action-list panel is light, not dark - a white glyph would be
+ *  invisible there, so this variant recolors to the brand indigo instead of leaving the glyph's
+ *  own white. */
 function transparentSvg(glyphMarkup) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${glyphMarkup}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${withColor(glyphMarkup, BRAND_INDIGO)}</svg>`;
 }
 
 /** A solid brand-indigo-background icon document - used for key faces and the plugin icon,
