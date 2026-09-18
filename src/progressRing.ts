@@ -14,8 +14,13 @@ const CENTER = SIZE / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /** StudyLife's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
- *  CSS for the canonical hex this is copied from. */
+ *  CSS for the canonical hex this is copied from. Used for the key's background (see
+ *  background()) - never for the arc itself, since an indigo arc on an indigo background would
+ *  be invisible. */
 const ACCENT_COLOR = "#4F46E5";
+/** The active arc's own color - solid white reads clearly against the indigo background,
+ *  matching Focus Mode's already-established white-ring-on-indigo look. */
+const ARC_COLOR = "#FFFFFF";
 const TRACK_COLOR = "rgba(255, 255, 255, 0.28)";
 /** A calmer, slightly dimmer track for the idle ring - distinct from the "actively tracking"
  *  track color so idle never reads as merely "0% progress". */
@@ -47,6 +52,16 @@ export function ringVisualFor(phase: Phase, fraction: number | undefined, now: n
   return { kind: "progress", fraction: Math.min(1, Math.max(0, fraction)) };
 }
 
+/**
+ * The key's own indigo background, matching key.png's flat fill - action.setImage() *replaces*
+ * the whole key face, not just overlays on top of it, so without painting this ourselves every
+ * call here would silently drop back to Stream Deck's own default (black) backdrop the moment
+ * this image is first set, not just look slightly different colored.
+ */
+function background(): string {
+  return `<rect width="${SIZE}" height="${SIZE}" fill="${ACCENT_COLOR}" />`;
+}
+
 function trackCircle(color: string): string {
   return `<circle cx="${CENTER}" cy="${CENTER}" r="${RADIUS}" fill="none" stroke="${color}" stroke-width="${STROKE}" />`;
 }
@@ -58,7 +73,7 @@ function arcCircle(fraction: number, rotationDeg: number): string {
   const dash = CIRCUMFERENCE * fraction;
   const gap = CIRCUMFERENCE - dash;
   return (
-    `<circle cx="${CENTER}" cy="${CENTER}" r="${RADIUS}" fill="none" stroke="${ACCENT_COLOR}" ` +
+    `<circle cx="${CENTER}" cy="${CENTER}" r="${RADIUS}" fill="none" stroke="${ARC_COLOR}" ` +
     `stroke-width="${STROKE}" stroke-linecap="round" stroke-dasharray="${dash} ${gap}" ` +
     `transform="rotate(${rotationDeg - 90} ${CENTER} ${CENTER})" />`
   );
@@ -70,12 +85,12 @@ function arcCircle(fraction: number, rotationDeg: number): string {
 export function progressRingSvg(visual: RingVisual): string {
   let body: string;
   if (visual.kind === "idle") {
-    body = trackCircle(IDLE_TRACK_COLOR);
+    body = `${background()}${trackCircle(IDLE_TRACK_COLOR)}`;
   } else if (visual.kind === "progress") {
-    body = `${trackCircle(TRACK_COLOR)}${arcCircle(visual.fraction, 0)}`;
+    body = `${background()}${trackCircle(TRACK_COLOR)}${arcCircle(visual.fraction, 0)}`;
   } else {
     const rotationDeg = ((visual.now % INDETERMINATE_PERIOD_MS) / INDETERMINATE_PERIOD_MS) * 360;
-    body = `${trackCircle(TRACK_COLOR)}${arcCircle(INDETERMINATE_ARC_FRACTION, rotationDeg)}`;
+    body = `${background()}${trackCircle(TRACK_COLOR)}${arcCircle(INDETERMINATE_ARC_FRACTION, rotationDeg)}`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">${body}</svg>`;
 }

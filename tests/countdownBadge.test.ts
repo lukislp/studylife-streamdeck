@@ -19,7 +19,7 @@ describe("countdownBadgeSvg", () => {
     const svg = countdownBadgeSvg({ daysLeft: 3 });
     expect(svg.startsWith("<svg")).toBe(true);
     expect(svg.endsWith("</svg>")).toBe(true);
-    expect(svg).toContain("<circle");
+    expect(svg).toContain("<rect");
     expect(svg).toContain("<text");
   });
 

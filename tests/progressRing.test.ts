@@ -39,15 +39,21 @@ describe("progressRingSvg", () => {
     }
   });
 
-  it("draws the idle ring as a single track circle with no accent arc", () => {
+  it("draws the idle ring over the key's indigo background, with no accent arc", () => {
     const svg = progressRingSvg({ kind: "idle" });
-    expect(svg).not.toContain("#4F46E5");
+    // The indigo background is present in every visual (see background()'s doc comment on why
+    // action.setImage() needs it repainted every time) - idle is distinguished from progress by
+    // the absence of a dasharray-drawn arc, not by the background color.
+    expect(svg).toContain("#4F46E5");
+    expect(svg).not.toContain("stroke-dasharray");
     expect((svg.match(/<circle/g) ?? []).length).toBe(1);
   });
 
-  it("draws a progress ring with both a track and an accent arc colored in the brand indigo", () => {
+  it("draws a progress ring with both a track and a white accent arc over the indigo background", () => {
     const svg = progressRingSvg({ kind: "progress", fraction: 0.5 });
     expect(svg).toContain("#4F46E5");
+    expect(svg).toContain("#FFFFFF");
+    expect(svg).toContain("stroke-dasharray");
     expect((svg.match(/<circle/g) ?? []).length).toBe(2);
   });
 

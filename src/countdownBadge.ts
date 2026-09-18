@@ -35,8 +35,11 @@ function badgeLabel(daysLeft: number): string {
 }
 
 /**
- * The badge's SVG markup for a known days-left count - a filled circle colored by urgency with
- * the day count centered inside. A plain string builder (no DOM/canvas), so it is testable with
+ * The badge's SVG markup for a known days-left count - the day count centered over a flat
+ * background colored by urgency, filling the whole key (not an inset circle): action.setImage()
+ * *replaces* the whole key face, so an inset shape would leave the rest of the canvas transparent
+ * and fall back to Stream Deck's own default (black) backdrop instead of matching every other
+ * key's flat-colored look. A plain string builder (no DOM/canvas), so it is testable with
  * ordinary string assertions.
  */
 export function countdownBadgeSvg(input: CountdownBadgeInput): string {
@@ -45,7 +48,7 @@ export function countdownBadgeSvg(input: CountdownBadgeInput): string {
   const fontSize = label.length > 2 ? 64 : 84;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">` +
-    `<circle cx="${SIZE / 2}" cy="${SIZE / 2}" r="${SIZE / 2 - 8}" fill="${color}" />` +
+    `<rect width="${SIZE}" height="${SIZE}" fill="${color}" />` +
     `<text x="${SIZE / 2}" y="${SIZE / 2}" text-anchor="middle" dominant-baseline="central" ` +
     `font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="${fontSize}" ` +
     `fill="${TEXT_COLOR}">${label}</text></svg>`
