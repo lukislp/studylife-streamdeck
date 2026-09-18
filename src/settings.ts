@@ -13,6 +13,11 @@ export interface GlobalSettings {
   apiKey?: string | undefined;
   currentCourseId?: number | undefined;
   currentCourseName?: string | undefined;
+  /** The built-in mode id (1-9) Focus Mode last cycled to - the "next session" preset Focus
+   *  Timer applies on its next genuine start, the same fallback shape currentCourseId gives
+   *  Switch Course. Never a custom mode (>= 100): Focus Mode only ever offers the built-in nine -
+   *  see timer.ts's BUILT_IN_MODES doc comment. */
+  currentModeId?: number | undefined;
   [key: string]: string | number | undefined;
 }
 
@@ -40,4 +45,12 @@ export async function setCurrentCourse(course: { courseId: number; courseName: s
     currentCourseId: course?.courseId,
     currentCourseName: course?.courseName,
   });
+}
+
+/** Sets the plugin-wide "next session" focus mode Focus Mode just cycled/confirmed - see
+ *  GlobalSettings.currentModeId. Split out for the same reason as setCurrentCourse: written far
+ *  more often, from a different action, than the connection fields. */
+export async function setCurrentMode(modeId: number | undefined): Promise<void> {
+  const current = await readSettings();
+  await streamDeck.settings.setGlobalSettings<GlobalSettings>({ ...current, currentModeId: modeId });
 }

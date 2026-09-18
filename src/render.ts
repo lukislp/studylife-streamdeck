@@ -2,7 +2,15 @@
 // is unit-testable without a Stream Deck connection, mirroring studylife-vscode's statusBar.ts
 // render functions.
 import type { MetricsSummary, UpcomingGoal } from "./api.js";
-import { type Phase, type TimerState, durationMinutes, formatCountdown, phaseOf, remainingMs } from "./timer.js";
+import {
+  BUILT_IN_MODES,
+  type Phase,
+  type TimerState,
+  durationMinutes,
+  formatCountdown,
+  phaseOf,
+  remainingMs,
+} from "./timer.js";
 
 export interface TimerRenderInput {
   connected: boolean;
@@ -103,4 +111,21 @@ export interface SwitchCourseRenderInput {
 export function switchCourseKeyTitle(input: SwitchCourseRenderInput): string {
   if (!input.connected) return "Not\nconnected";
   return input.courseName ?? "No course";
+}
+
+export interface FocusModeRenderInput {
+  connected: boolean;
+  /** The built-in mode id currently displayed: the confirmed "next session" pick, or - while a
+   *  Stream Deck + dial is mid-rotation - the not-yet-confirmed candidate under the user's
+   *  finger. Ignored when `connected` is false. */
+  modeId: number;
+}
+
+/** Multi-line title for the Focus Mode key/dial: the preset's name and its focus/break minutes,
+ *  same "/Xm" shape as timerKeyTitle's duration suffix. */
+export function focusModeKeyTitle(input: FocusModeRenderInput): string {
+  if (!input.connected) return "Not\nconnected";
+  const mode = BUILT_IN_MODES[input.modeId];
+  if (!mode) return "Unknown\nmode";
+  return `${mode.name}\n${String(mode.focus)}m/${String(mode.break)}m`;
 }

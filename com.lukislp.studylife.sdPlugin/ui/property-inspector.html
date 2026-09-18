@@ -3,9 +3,10 @@
   Shared Property Inspector for every action's settings: an always-present instance URL field and
   Connect/Disconnect buttons that drive the loopback OAuth flow running in the plugin process (see
   src/plugin.ts and src/auth.ts), plus a per-key "course" dropdown (Focus Timer, Course Goal, Quick
-  Note) and a preset-text field (Quick Note only), toggled by the action UUID Stream Deck hands
-  this page on load. The course dropdown's population logic lives in course-picker.js, shared
-  across all three sections rather than duplicated per action.
+  Note), a preset-text field (Quick Note only) and a default-topic field (Focus Timer only),
+  toggled by the action UUID Stream Deck hands this page on load. The course dropdown's population
+  logic lives in course-picker.js, shared across all three sections rather than duplicated per
+  action. Focus Mode has no per-key settings of its own, so it shows none of these sections.
 
   Implements the classic Stream Deck property-inspector WebSocket handshake directly (the Node SDK
   does not abstract the PI-side JS): Stream Deck calls connectElgatoStreamDeckSocket once this page
@@ -95,6 +96,12 @@
       <p class="hint">This is a fixed macro note, not free text per press - edit it here to change what the key sends.</p>
     </div>
 
+    <div id="topicSection" style="display: none">
+      <label for="topic">Default topic (optional)</label>
+      <input id="topic" type="text" placeholder="Sent as the session's topic when this key books one." />
+      <p class="hint">Left blank, no topic is sent - the session is booked exactly as before.</p>
+    </div>
+
     <div id="courseSection" style="display: none">
       <label id="courseLabel" for="courseId">Course</label>
       <select id="courseId"></select>
@@ -124,6 +131,7 @@
         "com.lukislp.studylife.coursegoal",
         "com.lukislp.studylife.quicknote",
       ]);
+      const TIMER_ACTION = "com.lukislp.studylife.timer";
       const QUICKNOTE_ACTION = "com.lukislp.studylife.quicknote";
       const COURSEGOAL_ACTION = "com.lukislp.studylife.coursegoal";
 
@@ -172,6 +180,7 @@
       function applyActionVisibility() {
         document.getElementById("courseSection").style.display = COURSE_ACTIONS.has(actionUuid) ? "block" : "none";
         document.getElementById("noteSection").style.display = actionUuid === QUICKNOTE_ACTION ? "block" : "none";
+        document.getElementById("topicSection").style.display = actionUuid === TIMER_ACTION ? "block" : "none";
         document.getElementById("courseLabel").textContent =
           actionUuid === COURSEGOAL_ACTION
             ? "Course to track"
@@ -194,6 +203,10 @@
         const content = document.getElementById("content");
         if (content && typeof currentSettings.content === "string" && content.value !== currentSettings.content) {
           content.value = currentSettings.content;
+        }
+        const topic = document.getElementById("topic");
+        if (topic && typeof currentSettings.topic === "string" && topic.value !== currentSettings.topic) {
+          topic.value = currentSettings.topic;
         }
       }
 
@@ -218,6 +231,10 @@
 
       document.getElementById("content").addEventListener("input", (e) => {
         saveSettings({ content: e.target.value });
+      });
+
+      document.getElementById("topic").addEventListener("input", (e) => {
+        saveSettings({ topic: e.target.value });
       });
 
       document.getElementById("connect").addEventListener("click", () => {

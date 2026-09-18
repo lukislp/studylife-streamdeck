@@ -10,6 +10,8 @@
 // This plugin therefore remembers what it started and, on stop, turns it into a session - unless
 // a planned one was already attached, in which case StudyLife is already accounting for the time
 // and a second row would double-count it.
+import type { NewSession } from "./api.js";
+import { berlinWallClockIso } from "./berlinTime.js";
 
 /** What this plugin recorded when a key started a run. */
 export interface TimerRun {
@@ -18,6 +20,10 @@ export interface TimerRun {
   startedAt: number;
   /** The planned session the timer was attached to when it started, if any. */
   sessionId?: number | null;
+  /** Focus Timer's per-key "default topic" (Property Inspector), captured at start so a mid-run
+   *  settings edit cannot change what a run in progress books. Sent as NewSession's Topic when
+   *  non-blank; omitted, not sent as "", when unset - see buildSessionRequest. */
+  topic?: string;
 }
 
 /**
@@ -43,4 +49,27 @@ export function decide(run: TimerRun | undefined, plannedSessionId: number | nul
   if (typeof plannedSessionId === "number") return { log: false, reason: "planned" };
   if (now - run.startedAt < MINIMUM_LOGGABLE_MS) return { log: false, reason: "too-short" };
   return { log: true, courseId: run.courseId, startedAt: run.startedAt, endedAt: now };
+}
+
+/**
+ * Builds the Sessions.Create payload for a run decide() said should be logged - split out from
+ * timer-action.ts's bookRun so the "Topic omitted, not sent empty" rule is unit-testable without a
+ * Stream Deck connection, same as decide() itself. CourseName is required non-empty by the
+ * server's Validate() but its content is ignored (see NewSession's doc comment), so a run whose
+ * name could not be resolved still falls back to a generic label rather than failing validation.
+ */
+export function buildSessionRequest(
+  run: TimerRun | undefined,
+  decision: Extract<Decision, { log: true }>,
+  timerModeId: number | undefined,
+): NewSession {
+  const topic = run?.topic?.trim();
+  return {
+    courseId: decision.courseId,
+    courseName: run?.courseName ?? "StudyLife session",
+    startTime: berlinWallClockIso(decision.startedAt),
+    endTime: berlinWallClockIso(decision.endedAt),
+    ...(timerModeId === undefined ? {} : { timerModeId }),
+    ...(topic ? { topic } : {}),
+  };
 }
