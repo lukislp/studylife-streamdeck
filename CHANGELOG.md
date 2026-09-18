@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.0...v1.3.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* recolor action-list icons for visibility on Stream Deck's light UI panel ([#8](https://github.com/lukislp/studylife-streamdeck/issues/8)) ([9f7c921](https://github.com/lukislp/studylife-streamdeck/commit/9f7c921e5649d872621633bcb1fe2e23fa3b319d))
+
 # [1.3.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.3...v1.3.0) (2026-09-18)
 
 
