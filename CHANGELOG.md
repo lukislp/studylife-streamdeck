@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.1...v1.3.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* use a darker neutral for action-list icon glyphs instead of brand indigo ([#9](https://github.com/lukislp/studylife-streamdeck/issues/9)) ([3492df7](https://github.com/lukislp/studylife-streamdeck/commit/3492df7f3697136b1be69639a113cdfd622f7893)), closes [#18181B](https://github.com/lukislp/studylife-streamdeck/issues/18181B)
+
 ## [1.3.1](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.0...v1.3.1) (2026-09-18)
 
 
