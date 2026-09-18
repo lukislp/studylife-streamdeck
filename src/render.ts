@@ -20,13 +20,18 @@ export interface TimerRenderInput {
    *  leaving it blank ("show as much useful info as possible" is an explicit v2 goal). Omitted
    *  while a phase is actively counting down: the countdown already uses the key's lines. */
   weekHours?: number | undefined;
+  /** True while `state` is stopped AND the Focus Timer action itself is the one holding a
+   *  remembered remainder to resume (FocusTimerAction.pausedRemainderMs) - the wire has no paused
+   *  flag (see timer.ts's phaseOf doc comment), so this can only ever be known locally, never
+   *  read off `state`. Ignored for a state that is actually running. */
+  pausedLocally?: boolean | undefined;
 }
 
 /** Multi-line title for the Focus Timer key - Stream Deck key titles wrap on "\n". */
 export function timerKeyTitle(input: TimerRenderInput): string {
   if (!input.connected) return "Not\nconnected";
   const phase = phaseOf(input.state);
-  const label = phaseLabel(phase);
+  const label = phase === "stopped" && input.pausedLocally ? "Paused" : phaseLabel(phase);
   const remaining = remainingMs(input.state, input.now);
   if (remaining === undefined) {
     return input.weekHours === undefined ? label : `${label}\n${formatHours(input.weekHours)} wk`;
@@ -42,8 +47,6 @@ function phaseLabel(phase: Phase): string {
       return "Focus";
     case "break":
       return "Break";
-    case "paused":
-      return "Paused";
     case "stopped":
       return "Start";
   }

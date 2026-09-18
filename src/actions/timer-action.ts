@@ -25,7 +25,7 @@ import { getCachedMetrics } from "../metricsCache.js";
 import { timerKeyTitle } from "../render.js";
 import { buildSessionRequest, decide, type TimerRun } from "../runLog.js";
 import { readSettings } from "../settings.js";
-import { type TimerState, nextTapAction, phaseOf, remainingMs, transition } from "../timer.js";
+import { type TimerState, nextTapAction, remainingMs, transition } from "../timer.js";
 
 const POLL_MS = 5_000;
 const LONG_PRESS_MS = 600;
@@ -88,7 +88,12 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
       const current = await api.getTimerState();
       const action = isLongPress ? "stop" : nextTapAction(current);
       const now = Date.now();
-      const startingFresh = action === "start" && phaseOf(current) === "stopped";
+      // Whether the server being stopped means "ready for a fresh run" or "this key is holding a
+      // pause to resume" cannot be read off `current` - the wire has no paused flag, and
+      // `sessionId` lingers on the server for reasons that have nothing to do with this plugin's
+      // own pause (see timer.ts's phaseOf doc comment for the bug this replaced). Only this
+      // action's own remembered remainder means "I am the one waiting to resume".
+      const startingFresh = action === "start" && !current.isRunning && this.pausedRemainderMs === undefined;
 
       if (action === "pause") {
         this.pausedRemainderMs = remainingMs(current, now);
@@ -203,6 +208,14 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
 
   private async render(target: VisibleAction, state: TimerState, weekHours?: number): Promise<void> {
     if (!target.isKey()) return;
-    await target.setTitle(timerKeyTitle({ connected: true, state, now: Date.now(), weekHours }));
+    await target.setTitle(
+      timerKeyTitle({
+        connected: true,
+        state,
+        now: Date.now(),
+        weekHours,
+        pausedLocally: this.pausedRemainderMs !== undefined,
+      }),
+    );
   }
 }
