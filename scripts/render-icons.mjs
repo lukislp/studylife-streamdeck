@@ -69,12 +69,29 @@ function transparentSvg(glyphMarkup) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${withColor(glyphMarkup, ICON_DARK)}</svg>`;
 }
 
-/** A solid brand-indigo-background icon document - used for key faces and the plugin icon,
- *  matching the flat indigo fill the placeholder key art already used. */
+/** A solid brand-indigo-background icon document, glyph centered - used for the plugin icon,
+ *  which never has a title overlaid on it. */
 function indigoSvg(glyphMarkup) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">` +
     `<rect width="100" height="100" fill="${BRAND_INDIGO}" />${glyphMarkup}</svg>`
+  );
+}
+
+/**
+ * The key-face variant: same indigo background, but the glyph is shrunk and shifted up into the
+ * top half. Actions that show a Stream Deck title (Focus Mode, Switch Course - see their doc
+ * comments) render that title roughly centered/lower on the key by default, and a full-size,
+ * vertically centered glyph collides directly with it (both white, both fighting for the same
+ * space). Shrinking and top-aligning the glyph here leaves the lower half clear for that text,
+ * and looks fine on actions with no title too (Quick Note) or a thin edge-hugging dynamic image
+ * on top (Focus Timer, Course Goal) rather than this static face.
+ */
+function indigoKeySvg(glyphMarkup) {
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">` +
+    `<rect width="100" height="100" fill="${BRAND_INDIGO}" />` +
+    `<g transform="translate(50 34) scale(0.56) translate(-50 -50)">${glyphMarkup}</g></svg>`
   );
 }
 
@@ -93,8 +110,8 @@ for (const { glyph, dir } of ACTIONS) {
   const actionDir = join(IMGS_DIR, "actions", dir);
   writePng(join(actionDir, "icon.png"), transparentSvg(markup), 20);
   writePng(join(actionDir, "icon@2x.png"), transparentSvg(markup), 40);
-  writePng(join(actionDir, "key.png"), indigoSvg(markup), 72);
-  writePng(join(actionDir, "key@2x.png"), indigoSvg(markup), 144);
+  writePng(join(actionDir, "key.png"), indigoKeySvg(markup), 72);
+  writePng(join(actionDir, "key@2x.png"), indigoKeySvg(markup), 144);
 }
 
 // The plugin's own category icon (manifest.json's CategoryIcon) and app icon (manifest.json's
