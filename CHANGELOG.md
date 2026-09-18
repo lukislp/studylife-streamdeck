@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.1...v1.2.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* stop guessing paused from a lingering sessionId, honour the Focus Mode pick ([#5](https://github.com/lukislp/studylife-streamdeck/issues/5)) ([9dba86a](https://github.com/lukislp/studylife-streamdeck/commit/9dba86ae7de2a6bc5d311d0502d55efbea3266a1))
+
 ## [1.2.1](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.0...v1.2.1) (2026-09-18)
 
 
