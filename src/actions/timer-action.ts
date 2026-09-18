@@ -20,11 +20,10 @@ import streamDeck, {
   WillAppearEvent,
   WillDisappearEvent,
 } from "@elgato/streamdeck";
-import { type NewSession, StudyLifeApi } from "../api.js";
-import { berlinWallClockIso } from "../berlinTime.js";
+import { StudyLifeApi } from "../api.js";
 import { getCachedMetrics } from "../metricsCache.js";
 import { timerKeyTitle } from "../render.js";
-import { decide, type TimerRun } from "../runLog.js";
+import { buildSessionRequest, decide, type TimerRun } from "../runLog.js";
 import { readSettings } from "../settings.js";
 import { type TimerState, nextTapAction, phaseOf, remainingMs, transition } from "../timer.js";
 
@@ -34,7 +33,11 @@ const LONG_PRESS_MS = 600;
 export interface FocusTimerSettings {
   /** Binds this specific key instance to one course, overriding the Switch Course fallback. */
   courseId?: number | undefined;
-  [key: string]: number | undefined;
+  /** A default Topic sent with the session this key books on stop, when set - written once here,
+   *  same "fixed text, not typed per press" shape as Quick Note's content field. Omitted, not
+   *  sent as "", when unset - see runLog.ts's buildSessionRequest. */
+  topic?: string | undefined;
+  [key: string]: number | string | undefined;
 }
 
 /** The two concrete action instance types onWillAppear/onKeyUp hand us - never ActionContext,
@@ -85,16 +88,32 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
       const current = await api.getTimerState();
       const action = isLongPress ? "stop" : nextTapAction(current);
       const now = Date.now();
+      const startingFresh = action === "start" && phaseOf(current) === "stopped";
 
       if (action === "pause") {
         this.pausedRemainderMs = remainingMs(current, now);
       }
-      if (action === "start" && phaseOf(current) === "stopped") {
-        await this.beginRun(api, ev.payload.settings.courseId, settings.currentCourseId, current, now);
+      if (startingFresh) {
+        await this.beginRun(
+          api,
+          ev.payload.settings.courseId,
+          settings.currentCourseId,
+          ev.payload.settings.topic,
+          current,
+          now,
+        );
       }
 
       const resumeMs = action === "start" ? this.pausedRemainderMs : undefined;
-      const next = transition(current, action, resumeMs === undefined ? { now } : { now, resumeMs });
+      // The Focus Mode preset is only ever honoured on a genuine stopped -> running transition -
+      // resuming a pause must keep measuring against the length already in progress (see
+      // timer.ts's TransitionOptions.modeId and canChangeMode).
+      const modeId = startingFresh ? settings.currentModeId : undefined;
+      const next = transition(current, action, {
+        now,
+        ...(resumeMs === undefined ? {} : { resumeMs }),
+        ...(modeId === undefined ? {} : { modeId }),
+      });
       const saved = await api.saveTimerState(next);
       if (action !== "pause") this.pausedRemainderMs = undefined;
 
@@ -115,6 +134,7 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
     api: StudyLifeApi,
     perKeyCourseId: number | undefined,
     fallbackCourseId: number | undefined,
+    perKeyTopic: string | undefined,
     current: TimerState,
     now: number,
   ): Promise<void> {
@@ -133,6 +153,7 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
       startedAt: now,
       sessionId: current.sessionId ?? null,
       ...(courseName === undefined ? {} : { courseName }),
+      ...(perKeyTopic === undefined ? {} : { topic: perKeyTopic }),
     };
   }
 
@@ -148,13 +169,7 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
     this.currentRun = undefined;
     if (!decision.log) return;
 
-    const session: NewSession = {
-      courseId: decision.courseId,
-      courseName: run?.courseName ?? "StudyLife session",
-      startTime: berlinWallClockIso(decision.startedAt),
-      endTime: berlinWallClockIso(decision.endedAt),
-      ...(timerModeId === undefined ? {} : { timerModeId }),
-    };
+    const session = buildSessionRequest(run, decision, timerModeId);
     try {
       await api.createSession(session);
     } catch (error) {

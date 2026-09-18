@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   type TimerState,
+  canChangeMode,
   durationMinutes,
   formatCountdown,
   modeName,
+  nextMode,
   nextTapAction,
   phaseOf,
   remainingMs,
+  stepMode,
   transition,
 } from "../src/timer.js";
 
@@ -118,6 +121,16 @@ describe("transitions", () => {
   it("always sends clientNow so the server can translate the deadline for other devices", () => {
     expect(transition(undefined, "start", { now: NOW }).clientNow).toBe(new Date(NOW).toISOString());
   });
+
+  it("honours an explicit modeId over whatever the current state already carries", () => {
+    const next = transition(running({ timerModeId: 1 }), "stop", { now: NOW, modeId: 8 });
+    expect(next.timerModeId).toBe(8);
+  });
+
+  it("falls back to the current state's mode, then 1, when no modeId is given", () => {
+    expect(transition(running({ timerModeId: 3 }), "pause", { now: NOW }).timerModeId).toBe(3);
+    expect(transition(undefined, "start", { now: NOW }).timerModeId).toBe(1);
+  });
 });
 
 describe("resuming after a pause", () => {
@@ -151,5 +164,51 @@ describe("tap cycling", () => {
     expect(nextTapAction({ isRunning: false })).toBe("start");
     expect(nextTapAction({ isRunning: false, sessionId: 42 })).toBe("start");
     expect(nextTapAction(running())).toBe("pause");
+  });
+});
+
+describe("canChangeMode", () => {
+  it("allows a change while stopped or paused, refuses it while running", () => {
+    expect(canChangeMode(undefined)).toBe(true);
+    expect(canChangeMode({ isRunning: false })).toBe(true);
+    expect(canChangeMode({ isRunning: false, sessionId: 42 })).toBe(true);
+    expect(canChangeMode(running())).toBe(false);
+  });
+});
+
+describe("mode cycling", () => {
+  it("steps through the nine built-ins in order, one press at a time", () => {
+    let id: number | undefined;
+    const seen: number[] = [];
+    for (let i = 0; i < 9; i++) {
+      id = nextMode(id);
+      seen.push(id);
+    }
+    expect(seen).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  });
+
+  it("wraps from the last built-in back to the first", () => {
+    expect(nextMode(9)).toBe(1);
+  });
+
+  it("starts at the first built-in when nothing is set yet", () => {
+    expect(nextMode(undefined)).toBe(1);
+  });
+
+  it("treats a custom mode (id >= 100) as unset, restarting the cycle rather than erroring", () => {
+    // Custom modes live in the user's settings, which this plugin cannot read - see
+    // BUILT_IN_MODES' doc comment.
+    expect(nextMode(100)).toBe(1);
+  });
+
+  it("steps backward for a negative count, wrapping past the first built-in to the last", () => {
+    expect(stepMode(1, -1)).toBe(9);
+    expect(stepMode(5, -1)).toBe(4);
+  });
+
+  it("steps by more than one detent at once, as a dial rotation reports multiple ticks", () => {
+    expect(stepMode(1, 3)).toBe(4);
+    expect(stepMode(1, 9)).toBe(1);
+    expect(stepMode(1, -3)).toBe(7);
   });
 });

@@ -13,6 +13,7 @@ import { StudyStatusAction } from "./actions/status-action.js";
 import { CourseGoalAction } from "./actions/coursegoal-action.js";
 import { QuickNoteAction } from "./actions/quicknote-action.js";
 import { SwitchCourseAction } from "./actions/switchcourse-action.js";
+import { FocusModeAction } from "./actions/focusmode-action.js";
 import { getCachedMetrics } from "./metricsCache.js";
 import { clearConnection, readSettings, storeConnection } from "./settings.js";
 
@@ -23,6 +24,7 @@ streamDeck.actions.registerAction(new StudyStatusAction());
 streamDeck.actions.registerAction(new CourseGoalAction());
 streamDeck.actions.registerAction(new QuickNoteAction());
 streamDeck.actions.registerAction(new SwitchCourseAction());
+streamDeck.actions.registerAction(new FocusModeAction());
 
 // Both interfaces need an explicit index signature (and `| undefined` rather than a bare `?:` on
 // every optional field) to structurally satisfy the SDK's JsonObject/JsonValue constraint under

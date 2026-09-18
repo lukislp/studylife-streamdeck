@@ -5,9 +5,9 @@
 [![License: AGPL-3.0](https://img.shields.io/github/license/lukislp/studylife-streamdeck)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)](https://www.typescriptlang.org/)
 
-Control your [StudyLife](https://github.com/lukislp/studylife) focus timer, see your study status,
-track course-goal countdowns and drop preset notes from physical Elgato Stream Deck keys - the
-same shared timer as the web app, the tray app,
+Control your [StudyLife](https://github.com/lukislp/studylife) focus timer, pick its preset, see
+your study status, track course-goal countdowns and drop preset notes from physical Elgato Stream
+Deck keys - and, on Stream Deck +, its dials - the same shared timer as the web app, the tray app,
 [studylife-vscode](https://github.com/lukislp/studylife-vscode) and Home Assistant.
 
 ## What it does
@@ -41,9 +41,20 @@ a course. Shows a green checkmark on success, a warning triangle on failure.
 course", the fallback source for any Focus Timer or Quick Note key with no course of its own
 bound. Its title shows the course it just switched to, or "No course" once cycled past the end.
 
-All five actions share one Property Inspector for the plugin's settings: an instance URL field and
-Connect/Disconnect buttons, plus a course dropdown (Focus Timer, Course Goal, Quick Note) and a
-preset-text field (Quick Note) shown depending on which action the key is running.
+**Focus Mode key/dial** - cycles the nine built-in focus presets (see "Only the built-in nine"
+below) that Focus Timer applies on its *next* genuine start, the same plugin-wide fallback shape
+Switch Course gives the current course. On any Stream Deck, pressing the key steps the cycle by
+one and applies it immediately; on Stream Deck +, the dial's touch display shows the preset name
+and its focus/break minutes, rotating it *scrubs* a candidate live without applying anything, and
+pushing the dial confirms the candidate shown - the same apply a keypad press performs. A mode can
+only be changed while the timer is stopped or paused: changing it mid-phase would re-measure a
+countdown already running against a length that no longer applies, so a press or a dial push while
+the timer is running shows an alert instead.
+
+All six actions share one Property Inspector for the plugin's settings: an instance URL field and
+Connect/Disconnect buttons, plus a course dropdown (Focus Timer, Course Goal, Quick Note), a
+preset-text field (Quick Note) and a default-topic field (Focus Timer), shown depending on which
+action the key is running. Focus Mode has no per-key settings of its own.
 
 ### Session booking
 
@@ -63,6 +74,53 @@ Property Inspector and sent verbatim on every press. This is a deliberate scope 
 missing feature: if you need different text per press, write it in the app instead and use a
 Quick Note key for a fixed macro (e.g. "Reviewed flashcards", a recurring TODO, a link you paste
 often).
+
+### Default topic
+
+Focus Timer's Property Inspector has an optional "Default topic" text field. When set, it is sent
+as the session's `Topic` on the `Sessions.Create` call that key's stop produces (see "Session
+booking" above); when left blank, `Topic` is simply omitted, exactly as before this field existed.
+It is captured once, when a run starts, so editing it mid-session never changes what that run
+books.
+
+### Only the built-in nine
+
+Focus Mode (and the mode a Focus Timer key applies on its next start) only ever offers the nine
+built-in presets:
+
+| Id | Name | Focus | Break |
+| -- | --- | --- | --- |
+| 1 | Pomodoro Classic | 25m | 5m |
+| 2 | Flow State | 52m | 17m |
+| 3 | Ultradian Rhythm | 90m | 20m |
+| 4 | Claude Mode | 40m | 10m |
+| 5 | Sprint Bursts | 10m | 3m |
+| 6 | Micro Focus | 5m | 1m |
+| 7 | Quick Burst | 15m | 3m |
+| 8 | Deep Dive | 120m | 20m |
+| 9 | Marathon Session | 180m | 30m |
+
+Custom modes (id ≥ 100) live in your StudyLife instance's own settings, and this plugin has no
+scope to read them - it can neither name nor time one, so it never offers or overwrites one. If a
+session is currently running on a custom mode, Focus Mode still shows and cycles the built-in
+nine; applying one of them only ever takes effect on the *next* start, never mid-phase, so a
+custom mode already running is left alone until you stop it yourself. This is a deliberate scope
+decision, not a missing feature - the same one `studylife-vscode`'s `pickTimerMode` command makes.
+
+### Course goals stay capped at five, on purpose
+
+Every "which course" picker in this plugin (Focus Timer, Course Goal, Quick Note, Switch Course)
+sources its list from `Metrics.GetSummary`'s `upcomingCourseGoals`, which the server caps at 5 open
+goals (`StudyMetrics.CalcUpcomingCourseGoals`). This plugin does not request `CourseGoals.GetAll`
+or any other scope to lift that cap - it is a deliberate, explicit product decision shared across
+every StudyLife client, not a limitation of this one.
+
+### No webhook management here
+
+This plugin does not manage StudyLife webhook subscriptions. A physical-button CRUD surface for
+webhook subscriptions is a poor fit for Stream Deck hardware and is deliberately scoped to
+[studylife-raycast](https://github.com/lukislp/studylife-raycast) instead, where a list UI already
+exists for exactly that.
 
 ## Requirements
 
@@ -98,7 +156,7 @@ logged in at the same time.
 ### 2. Install the plugin
 
 Download the latest `.streamDeckPlugin` from the [Releases](https://github.com/lukislp/studylife-streamdeck/releases)
-page and double-click it; Stream Deck installs it and offers all five actions in the action list
+page and double-click it; Stream Deck installs it and offers all six actions in the action list
 under the "StudyLife" category.
 
 ### 3. Connect

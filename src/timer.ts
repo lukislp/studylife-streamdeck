@@ -32,6 +32,11 @@ export interface TimerState {
   [key: string]: unknown;
 }
 
+/** The built-in mode ids, ascending - the cycle order Focus Mode's key/dial steps through. */
+export const BUILT_IN_MODE_IDS: readonly number[] = Object.keys(BUILT_IN_MODES)
+  .map(Number)
+  .sort((a, b) => a - b);
+
 export type Phase = "stopped" | "paused" | "focus" | "break";
 
 export function phaseOf(state: TimerState | undefined): Phase {
@@ -62,6 +67,33 @@ export function modeName(state: TimerState | undefined): string | undefined {
   return id === undefined ? undefined : BUILT_IN_MODES[id]?.name;
 }
 
+/** A mode may only be changed while the timer is stopped or paused: switching mid-phase would
+ *  leave a running countdown measured against a length that no longer applies - ported from
+ *  studylife-vscode's timer.ts canChangeMode(). */
+export function canChangeMode(current: TimerState | undefined): boolean {
+  return !current?.isRunning;
+}
+
+/**
+ * Steps the built-in mode cycle by `steps` positions - positive forward (1 -> 2 -> ... -> 9 -> 1),
+ * negative backward, wrapping at both ends. `current` outside the built-in range (undefined, or a
+ * custom mode id >= 100 already in use - see BUILT_IN_MODES' doc comment) is treated as "the cycle
+ * has not started yet", so the first forward step always lands on the first built-in rather than
+ * skipping past it.
+ */
+export function stepMode(current: number | undefined, steps: number): number {
+  const ids = BUILT_IN_MODE_IDS;
+  const length = ids.length;
+  const index = current === undefined ? -1 : ids.indexOf(current);
+  const wrapped = (((index + steps) % length) + length) % length;
+  return ids[wrapped] ?? 1;
+}
+
+/** One forward step of stepMode - what a Focus Mode key press, or a single dial detent, applies. */
+export function nextMode(current: number | undefined): number {
+  return stepMode(current, 1);
+}
+
 /** Milliseconds until the phase ends, clamped at zero. undefined when nothing is running. */
 export function remainingMs(state: TimerState | undefined, now: number): number | undefined {
   if (!state?.isRunning || !state.phaseEndsAt) return undefined;
@@ -88,6 +120,10 @@ export interface TransitionOptions {
    * it, "pause" is indistinguishable from "stop the clock and start over".
    */
   resumeMs?: number;
+  /** Switches the preset for the *next* session - honoured on start only, same as
+   *  studylife-vscode's TransitionOptions.modeId: applying it mid-phase would re-measure a
+   *  countdown already running against a length that no longer applies (see canChangeMode). */
+  modeId?: number;
   now: number;
 }
 
@@ -108,7 +144,7 @@ export function transition(
     isRunning: false,
     isBreak: current?.isBreak ?? false,
     currentRound: current?.currentRound ?? 1,
-    timerModeId: current?.timerModeId ?? 1,
+    timerModeId: options.modeId ?? current?.timerModeId ?? 1,
     phaseEndsAt: null,
     clientNow: new Date(options.now).toISOString(),
   };

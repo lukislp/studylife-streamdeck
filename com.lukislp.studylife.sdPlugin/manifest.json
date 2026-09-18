@@ -107,6 +107,30 @@
           "FontSize": 13
         }
       ]
+    },
+    {
+      "Name": "Focus Mode",
+      "UUID": "com.lukislp.studylife.focusmode",
+      "Icon": "imgs/actions/focusmode/icon",
+      "Tooltip": "Cycles the built-in focus preset applied to your next session. On Stream Deck + the dial scrubs presets live; push to apply.",
+      "Controllers": [
+        "Keypad",
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$X1",
+        "TriggerDescription": {
+          "Rotate": "Scrub the focus preset",
+          "Push": "Apply the scrubbed preset"
+        }
+      },
+      "States": [
+        {
+          "Image": "imgs/actions/focusmode/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13
+        }
+      ]
     }
   ]
 }
