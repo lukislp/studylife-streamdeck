@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Quick Note: a small note - a rounded rectangle with short horizontal lines of text. -->
+  <rect x="22" y="14" width="56" height="72" rx="10" fill="none" stroke="#FFFFFF" stroke-width="7" />
+  <line x1="34" y1="38" x2="66" y2="38" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+  <line x1="34" y1="54" x2="66" y2="54" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+  <line x1="34" y1="70" x2="58" y2="70" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+</svg>

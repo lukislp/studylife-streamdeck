@@ -22,10 +22,11 @@ import streamDeck, {
 } from "@elgato/streamdeck";
 import { StudyLifeApi } from "../api.js";
 import { getCachedMetrics } from "../metricsCache.js";
+import { ringVisualFor, progressRingDataUri } from "../progressRing.js";
 import { timerKeyTitle } from "../render.js";
 import { buildSessionRequest, decide, type TimerRun } from "../runLog.js";
 import { readSettings } from "../settings.js";
-import { type TimerState, nextTapAction, remainingMs, transition } from "../timer.js";
+import { type TimerState, nextTapAction, phaseOf, progress, remainingMs, transition } from "../timer.js";
 
 const POLL_MS = 5_000;
 const LONG_PRESS_MS = 600;
@@ -188,7 +189,12 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
   private async refresh(target: VisibleAction): Promise<void> {
     const settings = await readSettings();
     if (!settings.instanceUrl || !settings.apiKey) {
-      if (target.isKey()) await target.setTitle(timerKeyTitle({ connected: false, now: Date.now() }));
+      if (target.isKey()) {
+        await target.setTitle(timerKeyTitle({ connected: false, now: Date.now() }));
+        // No timer state at all yet - revert to the manifest's plain key art rather than
+        // leaving a stale ring from whatever was last rendered.
+        await target.setImage();
+      }
       return;
     }
     const api = new StudyLifeApi(settings.instanceUrl, settings.apiKey);
@@ -208,14 +214,20 @@ export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
 
   private async render(target: VisibleAction, state: TimerState, weekHours?: number): Promise<void> {
     if (!target.isKey()) return;
+    const now = Date.now();
     await target.setTitle(
       timerKeyTitle({
         connected: true,
         state,
-        now: Date.now(),
+        now,
         weekHours,
         pausedLocally: this.pausedRemainderMs !== undefined,
       }),
     );
+    // The ring's fraction is exactly progress()'s - undefined for a custom mode (id >= 100)
+    // renders as its own indeterminate visual rather than a fabricated percentage; a stopped
+    // phase always gets the calm idle outline (see ringVisualFor).
+    const visual = ringVisualFor(phaseOf(state), progress(state, now), now);
+    await target.setImage(progressRingDataUri(visual));
   }
 }

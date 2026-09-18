@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Focus Mode: a rotary knob/dial - a circle with a single pointer line from the center toward the edge. -->
+  <circle cx="50" cy="50" r="34" fill="none" stroke="#FFFFFF" stroke-width="8" />
+  <line x1="50" y1="50" x2="50" y2="20" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+  <circle cx="50" cy="50" r="5" fill="#FFFFFF" />
+</svg>

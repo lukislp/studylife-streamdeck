@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Switch Course: two curved arrows forming a cycle/refresh loop. -->
+  <path d="M 74 38 A 28 28 0 0 0 34 22" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+  <path d="M 30 28 L 34 22 L 40 30" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 26 62 A 28 28 0 0 0 66 78" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+  <path d="M 70 72 L 66 78 L 60 70" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

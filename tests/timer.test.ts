@@ -8,6 +8,7 @@ import {
   nextMode,
   nextTapAction,
   phaseOf,
+  progress,
   remainingMs,
   stepMode,
   transition,
@@ -168,6 +169,41 @@ describe("tap cycling", () => {
     expect(nextTapAction({ isRunning: false })).toBe("start");
     expect(nextTapAction({ isRunning: false, sessionId: 42 })).toBe("start");
     expect(nextTapAction(running())).toBe("pause");
+  });
+});
+
+describe("progress", () => {
+  it("is undefined when nothing is running", () => {
+    expect(progress(undefined, NOW)).toBeUndefined();
+    expect(progress({ isRunning: false }, NOW)).toBeUndefined();
+  });
+
+  it("is undefined for a custom mode instead of inventing a fraction", () => {
+    // Custom modes (id >= 100) live in the user's settings, which this plugin cannot read - see
+    // durationMinutes' doc comment. Without a known total there is no honest fraction, so this
+    // must stay undefined rather than guessing - progressRing.ts renders that as an explicitly
+    // indeterminate visual.
+    const state = running({ timerModeId: 100, phaseEndsAt: new Date(NOW + 90_000).toISOString() });
+    expect(progress(state, NOW)).toBeUndefined();
+  });
+
+  it("is 0 at the very start of a phase and approaches 1 near its end", () => {
+    // Pomodoro Classic focus phase is 25 minutes; 10 left means 15 have elapsed.
+    expect(progress(running(), NOW)).toBeCloseTo(15 / 25, 5);
+    const justStarted = running({ phaseEndsAt: new Date(NOW + 25 * MIN).toISOString() });
+    expect(progress(justStarted, NOW)).toBeCloseTo(0, 5);
+    const almostDone = running({ phaseEndsAt: new Date(NOW + 1000).toISOString() });
+    expect(progress(almostDone, NOW)).toBeGreaterThan(0.99);
+  });
+
+  it("clamps at 1 rather than going over once the phase has run past its end", () => {
+    expect(progress(running(), NOW + 30 * MIN)).toBe(1);
+  });
+
+  it("uses the break duration while on a break, not the focus duration", () => {
+    // Pomodoro Classic break is 5 minutes; 2 left means 3 have elapsed.
+    const onBreak = running({ isBreak: true, phaseEndsAt: new Date(NOW + 2 * MIN).toISOString() });
+    expect(progress(onBreak, NOW)).toBeCloseTo(3 / 5, 5);
   });
 });
 
