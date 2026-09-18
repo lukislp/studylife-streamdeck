@@ -1,13 +1,18 @@
 <!doctype html>
 <!--
-  Shared Property Inspector for both actions' plugin-level settings: an instance URL field and
+  Shared Property Inspector for every action's settings: an always-present instance URL field and
   Connect/Disconnect buttons that drive the loopback OAuth flow running in the plugin process (see
-  src/plugin.ts and src/auth.ts - this page has no Node access, so it only ever sends
-  "connect"/"disconnect"/"getStatus" messages and renders whatever "status" comes back).
+  src/plugin.ts and src/auth.ts), plus a per-key "course" dropdown (Focus Timer, Course Goal, Quick
+  Note) and a preset-text field (Quick Note only), toggled by the action UUID Stream Deck hands
+  this page on load. The course dropdown's population logic lives in course-picker.js, shared
+  across all three sections rather than duplicated per action.
 
   Implements the classic Stream Deck property-inspector WebSocket handshake directly (the Node SDK
   does not abstract the PI-side JS): Stream Deck calls connectElgatoStreamDeckSocket once this page
-  has loaded, and every message to/from the plugin flows over that one WebSocket.
+  has loaded, and every message to/from the plugin flows over that one WebSocket. Per-key settings
+  (courseId, content) use the SDK's native "getSettings"/"setSettings"/"didReceiveSettings"
+  messages directly; the plugin-wide connection status uses this repo's own
+  "sendToPlugin"/"getStatus" convention, same as v1.
 -->
 <html lang="en">
   <head>
@@ -27,7 +32,9 @@
         margin-bottom: 4px;
         color: #9a9a9a;
       }
-      input[type="text"] {
+      input[type="text"],
+      textarea,
+      select {
         width: 100%;
         box-sizing: border-box;
         padding: 6px 8px;
@@ -36,6 +43,12 @@
         border: 1px solid #555;
         border-radius: 4px;
         color: #e0e0e0;
+        font-family: inherit;
+        font-size: inherit;
+      }
+      textarea {
+        min-height: 4.5em;
+        resize: vertical;
       }
       button {
         padding: 6px 14px;
@@ -63,9 +76,32 @@
       #status.error {
         color: #e57373;
       }
+      hr {
+        border: none;
+        border-top: 1px solid #444;
+        margin: 16px 0;
+      }
+      .hint {
+        color: #9a9a9a;
+        font-size: 11px;
+        margin: -8px 0 12px;
+      }
     </style>
   </head>
   <body>
+    <div id="noteSection" style="display: none">
+      <label for="content">Preset note text</label>
+      <textarea id="content" placeholder="Written once here - Stream Deck has no keyboard, so a press always sends exactly this text."></textarea>
+      <p class="hint">This is a fixed macro note, not free text per press - edit it here to change what the key sends.</p>
+    </div>
+
+    <div id="courseSection" style="display: none">
+      <label id="courseLabel" for="courseId">Course</label>
+      <select id="courseId"></select>
+    </div>
+
+    <hr />
+
     <label for="instanceUrl">StudyLife instance URL</label>
     <input id="instanceUrl" type="text" placeholder="https://studylife.example.com" />
 
@@ -75,10 +111,21 @@
     </div>
     <div id="status"></div>
 
+    <script src="course-picker.js"></script>
     <script>
       let websocket;
       let uuid;
       let actionUuid = "com.lukislp.studylife.timer";
+      let currentSettings = {};
+
+      // Actions that offer the shared course dropdown at all.
+      const COURSE_ACTIONS = new Set([
+        "com.lukislp.studylife.timer",
+        "com.lukislp.studylife.coursegoal",
+        "com.lukislp.studylife.quicknote",
+      ]);
+      const QUICKNOTE_ACTION = "com.lukislp.studylife.quicknote";
+      const COURSEGOAL_ACTION = "com.lukislp.studylife.coursegoal";
 
       // eslint-disable-next-line no-unused-vars -- called by Stream Deck itself, not from this file
       function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
@@ -93,12 +140,20 @@
         websocket = new WebSocket("ws://127.0.0.1:" + inPort);
         websocket.onopen = () => {
           websocket.send(JSON.stringify({ event: inRegisterEvent, uuid: inUUID }));
+          applyActionVisibility();
           sendToPlugin({ event: "getStatus" });
+          websocket.send(JSON.stringify({ event: "getSettings", context: inUUID }));
+          if (COURSE_ACTIONS.has(actionUuid)) sendToPlugin({ event: "getCourses" });
         };
         websocket.onmessage = (ev) => {
           const message = JSON.parse(ev.data);
-          if (message.event === "sendToPlugin" && message.payload?.event === "status") {
-            render(message.payload);
+          if (message.event === "sendToPlugin" && message.payload && message.payload.event === "status") {
+            renderStatus(message.payload);
+          } else if (message.event === "sendToPlugin" && message.payload && message.payload.event === "courses") {
+            renderCourseOptions(message.payload);
+          } else if (message.event === "didReceiveSettings") {
+            currentSettings = (message.payload && message.payload.settings) || {};
+            applySettingsToFields();
           }
         };
       }
@@ -109,7 +164,40 @@
         );
       }
 
-      function render(status) {
+      function saveSettings(partial) {
+        currentSettings = { ...currentSettings, ...partial };
+        websocket.send(JSON.stringify({ event: "setSettings", context: uuid, payload: currentSettings }));
+      }
+
+      function applyActionVisibility() {
+        document.getElementById("courseSection").style.display = COURSE_ACTIONS.has(actionUuid) ? "block" : "none";
+        document.getElementById("noteSection").style.display = actionUuid === QUICKNOTE_ACTION ? "block" : "none";
+        document.getElementById("courseLabel").textContent =
+          actionUuid === COURSEGOAL_ACTION
+            ? "Course to track"
+            : actionUuid === QUICKNOTE_ACTION
+              ? "Tag with course (optional)"
+              : "Course for this key (optional - falls back to Switch Course)";
+      }
+
+      function renderCourseOptions(payload) {
+        const select = document.getElementById("courseId");
+        populateCourseSelect(select, payload.goals, actionUuid !== COURSEGOAL_ACTION);
+        applySettingsToFields();
+      }
+
+      function applySettingsToFields() {
+        const select = document.getElementById("courseId");
+        if (select && currentSettings.courseId !== undefined && currentSettings.courseId !== null) {
+          select.value = String(currentSettings.courseId);
+        }
+        const content = document.getElementById("content");
+        if (content && typeof currentSettings.content === "string" && content.value !== currentSettings.content) {
+          content.value = currentSettings.content;
+        }
+      }
+
+      function renderStatus(status) {
         const urlField = document.getElementById("instanceUrl");
         const statusEl = document.getElementById("status");
         if (status.instanceUrl && !urlField.value) urlField.value = status.instanceUrl;
@@ -122,6 +210,15 @@
             ? "Connected."
             : "Not connected.";
       }
+
+      document.getElementById("courseId").addEventListener("change", (e) => {
+        const value = e.target.value;
+        saveSettings({ courseId: value === "" ? undefined : Number(value) });
+      });
+
+      document.getElementById("content").addEventListener("input", (e) => {
+        saveSettings({ content: e.target.value });
+      });
 
       document.getElementById("connect").addEventListener("click", () => {
         const instanceUrl = document.getElementById("instanceUrl").value.trim();
