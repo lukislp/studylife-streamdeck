@@ -15,45 +15,32 @@ describe("isUrgent", () => {
 });
 
 describe("countdownBadgeSvg", () => {
-  it("renders a valid, non-empty SVG document", () => {
+  it("renders a valid, non-empty SVG document with a full-canvas background and no text", () => {
     const svg = countdownBadgeSvg({ daysLeft: 3 });
     expect(svg.startsWith("<svg")).toBe(true);
     expect(svg.endsWith("</svg>")).toBe(true);
     expect(svg).toContain("<rect");
-    expect(svg).toContain("<text");
+    // The day count is left to the key's title text (courseGoalKeyTitle) - baking it in here too
+    // used to collide with that title once both rendered white-on-indigo in the same spot.
+    expect(svg).not.toContain("<text");
   });
 
-  it("shows the plain day count for a future goal, colored in the neutral brand indigo", () => {
+  it("is the neutral brand indigo for a future goal", () => {
     const svg = countdownBadgeSvg({ daysLeft: 5 });
-    expect(svg).toContain(">5<");
     expect(svg).toContain("#4F46E5");
     expect(svg).not.toContain("#DC2626");
   });
 
-  it("switches to the warning color, still showing 0, when the goal is due today", () => {
+  it("switches to the warning color when the goal is due today", () => {
     const svg = countdownBadgeSvg({ daysLeft: 0 });
-    expect(svg).toContain(">0<");
     expect(svg).toContain("#DC2626");
     expect(svg).not.toContain("#4F46E5");
   });
 
-  it("switches to the warning color and shows the unsigned overdue count", () => {
+  it("switches to the warning color once overdue", () => {
     const svg = countdownBadgeSvg({ daysLeft: -4 });
-    // The sign only ever changes the color, never the number shown - matches render.ts's
-    // formatDue, which also reports the overdue magnitude via Math.abs.
-    expect(svg).toContain(">4<");
-    expect(svg).not.toContain(">-4<");
     expect(svg).toContain("#DC2626");
-  });
-
-  it("never invents a completion percentage - only ever the day count appears", () => {
-    const svg = countdownBadgeSvg({ daysLeft: 7 });
-    expect(svg).not.toMatch(/%/);
-  });
-
-  it("caps an absurdly large day count instead of overflowing the badge", () => {
-    const svg = countdownBadgeSvg({ daysLeft: 5000 });
-    expect(svg).toContain(">999+<");
+    expect(svg).not.toContain("#4F46E5");
   });
 });
 
