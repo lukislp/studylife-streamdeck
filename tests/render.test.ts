@@ -28,9 +28,24 @@ describe("timerKeyTitle", () => {
     );
   });
 
-  it("shows Paused for a state this plugin itself paused, with the week figure too", () => {
+  it("shows Paused only via the local flag, never by guessing from a lingering sessionId", () => {
     const state: TimerState = { isRunning: false, sessionId: 42 };
-    expect(timerKeyTitle({ connected: true, state, now: NOW, weekHours: 3 })).toBe("Paused\n3h wk");
+    expect(timerKeyTitle({ connected: true, state, now: NOW, weekHours: 3, pausedLocally: true })).toBe(
+      "Paused\n3h wk",
+    );
+    // sessionId alone, with no pausedLocally flag, is just a stopped state - see timer.ts's
+    // phaseOf doc comment for why sessionId cannot be trusted as a pause signal.
+    expect(timerKeyTitle({ connected: true, state, now: NOW, weekHours: 3 })).toBe("Start\n3h wk");
+  });
+
+  it("ignores pausedLocally while a phase is actually running", () => {
+    const state: TimerState = {
+      isRunning: true,
+      isBreak: false,
+      timerModeId: 1,
+      phaseEndsAt: new Date(NOW + 10 * MIN).toISOString(),
+    };
+    expect(timerKeyTitle({ connected: true, state, now: NOW, pausedLocally: true })).toBe("Focus\n10:00\n/25m");
   });
 
   it("counts down focus and break phases with the phase label and total, dropping the week figure", () => {

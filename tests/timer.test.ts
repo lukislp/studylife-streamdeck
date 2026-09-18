@@ -29,10 +29,14 @@ function running(overrides: Partial<TimerState> = {}): TimerState {
 }
 
 describe("phase", () => {
-  it("distinguishes stopped, paused, focus and break", () => {
+  it("distinguishes stopped, focus and break - purely from the wire, never guessing paused", () => {
     expect(phaseOf(undefined)).toBe("stopped");
     expect(phaseOf({ isRunning: false })).toBe("stopped");
-    expect(phaseOf({ isRunning: false, sessionId: 42 })).toBe("paused");
+    // A lingering sessionId on an otherwise-stopped state must NOT read as "paused" - the wire
+    // has no paused flag, and sessionId lingers for reasons unrelated to this plugin's own
+    // pause/resume (another client's session, one already planned). Whether a resume is pending
+    // is tracked locally instead - see render.ts's TimerRenderInput.pausedLocally.
+    expect(phaseOf({ isRunning: false, sessionId: 42 })).toBe("stopped");
     expect(phaseOf(running())).toBe("focus");
     expect(phaseOf(running({ isBreak: true }))).toBe("break");
   });

@@ -37,18 +37,25 @@ export const BUILT_IN_MODE_IDS: readonly number[] = Object.keys(BUILT_IN_MODES)
   .map(Number)
   .sort((a, b) => a - b);
 
-export type Phase = "stopped" | "paused" | "focus" | "break";
+/**
+ * Only ever derived from the wire, which has no "paused" flag (see the file header) - so this is
+ * "stopped", not "paused", for every non-running state, including one this plugin itself just
+ * paused. An earlier version tried to infer "paused" here from `sessionId` being set, on the
+ * theory that a fresh stop always nulls it out; in practice `sessionId` lingers on the server for
+ * reasons unrelated to this plugin's own pause/resume (a session from another client, a planned
+ * one already attached), so that state was frequently "paused" when the timer was actually simply
+ * stopped - `startingFresh` in timer-action.ts's onKeyUp then wrongly skipped a fresh run's Focus
+ * Mode pick and session-booking, always falling back to whatever timerModeId happened to be on
+ * the server row instead of what was just selected. Whether *this* key is the one waiting to
+ * resume a pause is tracked locally instead (FocusTimerAction.pausedRemainderMs) - see
+ * render.ts's TimerRenderInput.pausedLocally for the one place that distinction still matters for
+ * the UI.
+ */
+export type Phase = "stopped" | "focus" | "break";
 
 export function phaseOf(state: TimerState | undefined): Phase {
-  if (!state?.isRunning) return isPaused(state) ? "paused" : "stopped";
+  if (!state?.isRunning) return "stopped";
   return state.isBreak ? "break" : "focus";
-}
-
-/** A "paused" phase is indistinguishable from "stopped" on the wire (see the file header) - the
- *  key action tracks it itself via the resumeMs it remembers from its own pause tap, so this is
- *  only ever true for a state this plugin itself just paused, not one read fresh off the server. */
-function isPaused(state: TimerState | undefined): boolean {
-  return Boolean(state?.sessionId) && !state?.isRunning;
 }
 
 /**
