@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.0...v1.2.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* surface course-load errors, dedupe concurrent connects, wrap long key titles ([#4](https://github.com/lukislp/studylife-streamdeck/issues/4)) ([5406a47](https://github.com/lukislp/studylife-streamdeck/commit/5406a47ffa01da1f7c940b48b5abb415280c846b))
+
 # [1.2.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.1.0...v1.2.0) (2026-09-18)
 
 
