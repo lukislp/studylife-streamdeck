@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.2...v1.2.3) (2026-09-18)
+
+
+### Bug Fixes
+
+* correct sendToPropertyInspector message check and cycle Course Goal on press ([#6](https://github.com/lukislp/studylife-streamdeck/issues/6)) ([4846aa1](https://github.com/lukislp/studylife-streamdeck/commit/4846aa1a4c87700759f65016b8a6b9cfc230d349))
+
 ## [1.2.2](https://github.com/lukislp/studylife-streamdeck/compare/v1.2.1...v1.2.2) (2026-09-18)
 
 
