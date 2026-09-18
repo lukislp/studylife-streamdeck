@@ -21,6 +21,12 @@ const IMGS_DIR = join(ROOT, "com.lukislp.studylife.sdPlugin", "imgs");
  *  CSS for the canonical hex this is copied from. */
 const BRAND_INDIGO = "#4F46E5";
 
+/** A near-black neutral for the action-list icon's glyph - indigo is a mid-tone and reads as
+ *  weak/washed-out at the tiny sizes that panel renders (20x20/40x40), even though it is not
+ *  literally invisible the way white was. Dark neutral gives the strongest possible contrast
+ *  against a light panel without needing to match its exact background shade. */
+const ICON_DARK = "#18181B";
+
 /** Each action's glyph source file and the directory its rendered icon.png/icon@2x.png/key.png/
  *  key@2x.png live under - both already fixed by manifest.json, only the pixel content changes
  *  here. */
@@ -56,11 +62,11 @@ function withColor(glyphMarkup, color) {
 }
 
 /** A transparent-background icon document - used for the tiny action-list icon and the category
- *  icon. Stream Deck's own action-list panel is light, not dark - a white glyph would be
- *  invisible there, so this variant recolors to the brand indigo instead of leaving the glyph's
- *  own white. */
+ *  icon. Stream Deck's own action-list panel is light, not dark, so this variant recolors to a
+ *  near-black neutral (ICON_DARK) rather than leaving the glyph's own white - brand indigo was
+ *  tried first but is too light a mid-tone to read clearly at this size against that panel. */
 function transparentSvg(glyphMarkup) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${withColor(glyphMarkup, BRAND_INDIGO)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${withColor(glyphMarkup, ICON_DARK)}</svg>`;
 }
 
 /** A solid brand-indigo-background icon document - used for key faces and the plugin icon,
