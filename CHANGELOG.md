@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.1.0...v1.2.0) (2026-09-18)
+
+
+### Features
+
+* add Focus Mode preset cycling with Stream Deck + dial support and a session topic field ([#3](https://github.com/lukislp/studylife-streamdeck/issues/3)) ([844c94d](https://github.com/lukislp/studylife-streamdeck/commit/844c94d3bc4b9393bb4b454a35e71194e8fea1bb))
+
 # [1.1.0](https://github.com/lukislp/studylife-streamdeck/compare/v1.0.1...v1.1.0) (2026-09-18)
 
 
