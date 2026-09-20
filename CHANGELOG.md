@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.5...v1.3.6) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ci:** correct missing Harden Runner allowlist ports (github.com:22, crl:80) ([#17](https://github.com/lukislp/studylife-streamdeck/issues/17)) ([3cd4207](https://github.com/lukislp/studylife-streamdeck/commit/3cd4207366680e85bcca442d5cd81abbef352e38))
+
 ## [1.3.5](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.4...v1.3.5) (2026-09-20)
 
 
