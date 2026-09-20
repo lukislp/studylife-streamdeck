@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.4...v1.3.5) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ci:** add Harden Runner in audit mode to every job ([#15](https://github.com/lukislp/studylife-streamdeck/issues/15)) ([d988327](https://github.com/lukislp/studylife-streamdeck/commit/d9883270463331cd32e724af33911584b0e3a2f1))
+
 ## [1.3.4](https://github.com/lukislp/studylife-streamdeck/compare/v1.3.3...v1.3.4) (2026-09-18)
 
 
