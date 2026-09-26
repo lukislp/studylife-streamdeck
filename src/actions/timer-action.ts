@@ -16,6 +16,7 @@ import streamDeck, {
   type KeyAction,
   KeyDownEvent,
   KeyUpEvent,
+  type NeoInfobarAction,
   SingletonAction,
   WillAppearEvent,
   WillDisappearEvent,
@@ -41,9 +42,14 @@ export interface FocusTimerSettings {
   [key: string]: number | string | undefined;
 }
 
-/** The two concrete action instance types onWillAppear/onKeyUp hand us - never ActionContext,
- *  which onWillDisappear carries instead and which this action never needs to render into. */
-type VisibleAction = DialAction<FocusTimerSettings> | KeyAction<FocusTimerSettings>;
+/** The concrete action instance types onWillAppear/onKeyUp hand us - never ActionContext, which
+ *  onWillDisappear carries instead and which this action never needs to render into. Includes
+ *  NeoInfobarAction (Stream Deck Neo, added in SDK v3) purely so it type-checks as a member of
+ *  Action<T>; this key has no infobar art, so isKey() below bails out of that case at runtime. */
+type VisibleAction =
+  | DialAction<FocusTimerSettings>
+  | KeyAction<FocusTimerSettings>
+  | NeoInfobarAction<FocusTimerSettings>;
 
 @action({ UUID: "com.lukislp.studylife.timer" })
 export class FocusTimerAction extends SingletonAction<FocusTimerSettings> {
