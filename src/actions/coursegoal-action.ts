@@ -9,6 +9,7 @@ import streamDeck, {
   type DialAction,
   type KeyAction,
   KeyUpEvent,
+  type NeoInfobarAction,
   SingletonAction,
   WillAppearEvent,
   WillDisappearEvent,
@@ -28,7 +29,12 @@ export interface CourseGoalSettings {
   [key: string]: number | undefined;
 }
 
-type VisibleAction = DialAction<CourseGoalSettings> | KeyAction<CourseGoalSettings>;
+// v3 of the SDK added NeoInfobarAction (Stream Deck Neo) as a third member of Action<T>; this key
+// has no infobar art, so refresh() below relies on isKey() to bail out of that case at runtime.
+type VisibleAction =
+  | DialAction<CourseGoalSettings>
+  | KeyAction<CourseGoalSettings>
+  | NeoInfobarAction<CourseGoalSettings>;
 
 @action({ UUID: "com.lukislp.studylife.coursegoal" })
 export class CourseGoalAction extends SingletonAction<CourseGoalSettings> {

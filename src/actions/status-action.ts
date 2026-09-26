@@ -3,11 +3,13 @@
 // press. Every number comes from StudyLife's own metrics/history endpoints - the single place
 // those are calculated (see MetricsController, SessionsController) - so this key can never
 // quietly disagree with the web app, exactly like studylife-vscode's status bar.
+import type { JsonObject } from "@elgato/utils";
 import streamDeck, {
   action,
   type DialAction,
   type KeyAction,
   KeyUpEvent,
+  type NeoInfobarAction,
   SingletonAction,
   WillAppearEvent,
   WillDisappearEvent,
@@ -20,8 +22,9 @@ import { readSettings } from "../settings.js";
 
 const POLL_MS = 60_000;
 
-/** See timer-action.ts's VisibleAction for why this excludes ActionContext. */
-type VisibleAction = DialAction | KeyAction;
+/** See timer-action.ts's VisibleAction for why this excludes ActionContext but includes
+ *  NeoInfobarAction. This action has no per-key settings, hence the plain JsonObject. */
+type VisibleAction = DialAction<JsonObject> | KeyAction<JsonObject> | NeoInfobarAction<JsonObject>;
 
 @action({ UUID: "com.lukislp.studylife.status" })
 export class StudyStatusAction extends SingletonAction {

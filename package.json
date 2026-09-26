@@ -24,7 +24,8 @@
     "package": "npx --yes @elgato/cli@1.9.0 pack com.lukislp.studylife.sdPlugin -o . -f --no-update-check"
   },
   "dependencies": {
-    "@elgato/streamdeck": "^2.1.2"
+    "@elgato/streamdeck": "^3.0.0",
+    "@elgato/utils": "0.6.0"
   },
   "devDependencies": {
     "@elgato/cli": "^1.10.0",

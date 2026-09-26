@@ -14,6 +14,7 @@
 // A mode may only be changed while the timer is stopped or paused (timer.ts's canChangeMode) -
 // switching mid-phase would re-measure a countdown already running against a length that no
 // longer applies. A refused apply shows an alert, exactly like every other write in this plugin.
+import type { JsonObject } from "@elgato/utils";
 import streamDeck, {
   action,
   type DialAction,
@@ -21,6 +22,7 @@ import streamDeck, {
   DialRotateEvent,
   type KeyAction,
   KeyUpEvent,
+  type NeoInfobarAction,
   SingletonAction,
   WillAppearEvent,
   WillDisappearEvent,
@@ -33,8 +35,9 @@ import { BUILT_IN_MODE_IDS, canChangeMode, nextMode, stepMode, type TimerState }
 const POLL_MS = 60_000;
 const DEFAULT_MODE_ID = BUILT_IN_MODE_IDS[0] ?? 1;
 
-/** See timer-action.ts's VisibleAction for why this excludes ActionContext. */
-type VisibleAction = DialAction | KeyAction;
+/** See timer-action.ts's VisibleAction for why this excludes ActionContext but includes
+ *  NeoInfobarAction. This action has no per-key settings, hence the plain JsonObject. */
+type VisibleAction = DialAction<JsonObject> | KeyAction<JsonObject> | NeoInfobarAction<JsonObject>;
 
 @action({ UUID: "com.lukislp.studylife.focusmode" })
 export class FocusModeAction extends SingletonAction {
@@ -132,6 +135,8 @@ export class FocusModeAction extends SingletonAction {
   }
 
   private async refresh(target: VisibleAction): Promise<void> {
+    // A Neo Infobar has no title/showAlert surface at all - see the VisibleAction doc comment.
+    if (target.isNeoInfobar()) return;
     const settings = await readSettings();
     if (!settings.instanceUrl || !settings.apiKey) {
       await target.setTitle(focusModeKeyTitle({ connected: false, modeId: DEFAULT_MODE_ID }));
