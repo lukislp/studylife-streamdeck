@@ -28,7 +28,7 @@
     "@elgato/utils": "0.6.1"
   },
   "devDependencies": {
-    "@elgato/cli": "^1.10.2",
+    "@elgato/cli": "^1.10.3",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.6.5",
     "esbuild": "^0.28.2",
