@@ -1,4 +1,4 @@
-# Contributing to StudyLife for Stream Deck
+# Contributing to StudyAtrium for Stream Deck
 
 Thanks for taking the time. This is a single-maintainer project, so the process is deliberately
 small - but it is the same for every change, including the maintainer's own.

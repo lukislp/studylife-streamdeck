@@ -80,8 +80,8 @@ describe("buildSessionRequest", () => {
 
   it("falls back to a generic courseName when the run's own name could not be resolved", () => {
     const run = { courseId: 7, startedAt: decision.startedAt };
-    expect(buildSessionRequest(run, decision, undefined).courseName).toBe("StudyLife session");
-    expect(buildSessionRequest(undefined, decision, undefined).courseName).toBe("StudyLife session");
+    expect(buildSessionRequest(run, decision, undefined).courseName).toBe("StudyAtrium session");
+    expect(buildSessionRequest(undefined, decision, undefined).courseName).toBe("StudyAtrium session");
   });
 
   it("carries the course id and Europe/Berlin wall-clock start/end times through unchanged", () => {
