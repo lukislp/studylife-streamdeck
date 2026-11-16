@@ -52,7 +52,7 @@ function tryBind(port: number): Promise<Listener | undefined> {
       const params = parseCallback(req.url ?? "/");
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(
-        "<!doctype html><meta charset=utf-8><title>StudyLife</title>" +
+        "<!doctype html><meta charset=utf-8><title>StudyAtrium</title>" +
           "<body style=\"font-family:system-ui;padding:3rem;text-align:center\">" +
           "<h1>Connected</h1><p>You can close this tab and go back to Stream Deck.</p>",
       );
@@ -97,7 +97,7 @@ export async function runLogin(
     const result = await listener.waitForCallback(CALLBACK_TIMEOUT_MS);
     if (!result) {
       throw new LoginError(
-        "Timed out waiting for StudyLife to redirect back. Either the approval was not finished " +
+        "Timed out waiting for StudyAtrium to redirect back. Either the approval was not finished " +
           `in the browser, or "${clientId}" is not registered on that instance yet - see the ` +
           "README for how to register it once via studylife-developers.",
       );
@@ -109,7 +109,7 @@ export async function runLogin(
       );
     }
     if (!result.assertion) {
-      throw new LoginError("StudyLife's callback carried no assertion - the connection was denied.");
+      throw new LoginError("StudyAtrium's callback carried no assertion - the connection was denied.");
     }
     return await exchangeAssertion(baseUrl, clientId, result.assertion, verifier);
   } finally {
@@ -132,11 +132,11 @@ async function exchangeAssertion(
   });
   if (!response.ok) {
     throw new LoginError(
-      `StudyLife refused the assertion exchange (${response.status}). The approval may have ` +
+      `StudyAtrium refused the assertion exchange (${response.status}). The approval may have ` +
         "expired - connect again.",
     );
   }
   const body = (await response.json()) as { apiKey?: string };
-  if (!body.apiKey) throw new LoginError("StudyLife's exchange response carried no API key.");
+  if (!body.apiKey) throw new LoginError("StudyAtrium's exchange response carried no API key.");
   return body.apiKey;
 }

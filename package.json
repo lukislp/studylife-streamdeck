@@ -1,6 +1,6 @@
 {
   "name": "studylife-streamdeck",
-  "description": "Elgato Stream Deck plugin for StudyLife: control the focus timer and see study status from physical keys.",
+  "description": "Elgato Stream Deck plugin for StudyAtrium: control the focus timer and see study status from physical keys.",
   "version": "1.3.6",
   "private": true,
   "license": "AGPL-3.0-or-later",

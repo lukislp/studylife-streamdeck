@@ -1,11 +1,13 @@
-# StudyLife for Stream Deck
+# StudyAtrium for Stream Deck
+
+(formerly StudyLife)
 
 [![CI](https://github.com/lukislp/studylife-streamdeck/actions/workflows/ci.yml/badge.svg)](https://github.com/lukislp/studylife-streamdeck/actions/workflows/ci.yml) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/lukislp/studylife-streamdeck/badge)](https://scorecard.dev/viewer/?uri=github.com/lukislp/studylife-streamdeck) [![CodeQL](https://github.com/lukislp/studylife-streamdeck/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/lukislp/studylife-streamdeck/security/code-scanning)
 [![Release](https://img.shields.io/github/v/release/lukislp/studylife-streamdeck)](https://github.com/lukislp/studylife-streamdeck/releases)
 [![License: AGPL-3.0](https://img.shields.io/github/license/lukislp/studylife-streamdeck)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)](https://www.typescriptlang.org/)
 
-Control your [StudyLife](https://github.com/lukislp/studylife) focus timer, pick its preset, see
+Control your [StudyAtrium](https://github.com/lukislp/studylife) focus timer, pick its preset, see
 your study status, track course-goal countdowns and drop preset notes from physical Elgato Stream
 Deck keys - and, on Stream Deck +, its dials - the same shared timer as the web app, the tray app,
 [studylife-vscode](https://github.com/lukislp/studylife-vscode) and Home Assistant.
@@ -29,7 +31,7 @@ lasted at least 10 seconds, it is automatically logged as a study session via `S
 see "Session booking" below.
 
 **Study Status key** - shows this week's and today's study hours plus your current streak,
-refreshed once a minute; pressing it refreshes immediately. Every number comes from StudyLife's
+refreshed once a minute; pressing it refreshes immediately. Every number comes from StudyAtrium's
 own metrics/history endpoints, the single place those are calculated, so this key can never
 quietly disagree with the web app.
 
@@ -65,13 +67,13 @@ action the key is running. Focus Mode has no per-key settings of its own.
 
 ### Session booking
 
-StudyLife's timer carries neither a course nor a start time - starting it from a Stream Deck key
+StudyAtrium's timer carries neither a course nor a start time - starting it from a Stream Deck key
 with nothing already planned would otherwise book nothing. This plugin therefore remembers what a
 key started and, on stop, books that stretch as a session - unless a planned session was already
-attached to the timer, in which case StudyLife is already accounting for the time and a second row
+attached to the timer, in which case StudyAtrium is already accounting for the time and a second row
 would double-count it. Runs under 10 seconds (an accidental tap) are not logged. `StartTime`/
 `EndTime` are always constructed as Europe/Berlin wall-clock time, regardless of what timezone the
-machine running this plugin is in - StudyLife's API expects every `DateTime` as naive local time
+machine running this plugin is in - StudyAtrium's API expects every `DateTime` as naive local time
 in its own timezone, with no offset in the JSON.
 
 ### Quick Note is a preset, not free text
@@ -107,7 +109,7 @@ built-in presets:
 | 8 | Deep Dive | 120m | 20m |
 | 9 | Marathon Session | 180m | 30m |
 
-Custom modes (id ≥ 100) live in your StudyLife instance's own settings, and this plugin has no
+Custom modes (id ≥ 100) live in your StudyAtrium instance's own settings, and this plugin has no
 scope to read them - it can neither name nor time one, so it never offers or overwrites one. If a
 session is currently running on a custom mode, Focus Mode still shows and cycles the built-in
 nine; applying one of them only ever takes effect on the *next* start, never mid-phase, so a
@@ -120,7 +122,7 @@ Every "which course" picker in this plugin (Focus Timer, Course Goal, Quick Note
 sources its list from `Metrics.GetSummary`'s `upcomingCourseGoals`, which the server caps at 5 open
 goals (`StudyMetrics.CalcUpcomingCourseGoals`). This plugin does not request `CourseGoals.GetAll`
 or any other scope to lift that cap - it is a deliberate, explicit product decision shared across
-every StudyLife client, not a limitation of this one.
+every StudyAtrium client, not a limitation of this one.
 
 ### Real icon artwork and dynamic key images
 
@@ -172,14 +174,14 @@ and configure each one's own settings exactly as you would standalone.
 
 ### No webhook management here
 
-This plugin does not manage StudyLife webhook subscriptions. A physical-button CRUD surface for
+This plugin does not manage StudyAtrium webhook subscriptions. A physical-button CRUD surface for
 webhook subscriptions is a poor fit for Stream Deck hardware and is deliberately scoped to
 [studylife-raycast](https://github.com/lukislp/studylife-raycast) instead, where a list UI already
 exists for exactly that.
 
 ## Requirements
 
-- A self-hosted StudyLife instance you can reach from this machine
+- A self-hosted StudyAtrium instance you can reach from this machine
 - Stream Deck software 6.4 or newer
 - The client registered once on your instance (see below)
 
@@ -212,7 +214,7 @@ logged in at the same time.
 
 Download the latest `.streamDeckPlugin` from the [Releases](https://github.com/lukislp/studylife-streamdeck/releases)
 page and double-click it; Stream Deck installs it and offers all six actions in the action list
-under the "StudyLife" category.
+under the "StudyAtrium" category.
 
 ### 3. Connect
 
@@ -254,7 +256,7 @@ keep the SDK-facing half separate precisely so the rest can be tested without a 
 "paused" flag, and the server accepts unknown JSON properties silently - so a wrong field name
 produces a green build and a key that does nothing.
 
-`berlinTime.ts` is worth reading before changing anything that sends a `DateTime` to StudyLife's
+`berlinTime.ts` is worth reading before changing anything that sends a `DateTime` to StudyAtrium's
 API. Every `DateTime` it sends or expects is naive local time in the server's own Europe/Berlin
 timezone, never UTC and never the client machine's own timezone, with no offset in the JSON -
 getting this wrong is invisible in a green build and silently books sessions at the wrong hour.

@@ -66,7 +66,7 @@ export function buildSessionRequest(
   const topic = run?.topic?.trim();
   return {
     courseId: decision.courseId,
-    courseName: run?.courseName ?? "StudyLife session",
+    courseName: run?.courseName ?? "StudyAtrium session",
     startTime: berlinWallClockIso(decision.startedAt),
     endTime: berlinWallClockIso(decision.endedAt),
     ...(timerModeId === undefined ? {} : { timerModeId }),
