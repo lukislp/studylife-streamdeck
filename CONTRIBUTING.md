@@ -35,6 +35,8 @@ npm run build
 npm run package
 ```
 
+CI also runs `node scripts/audit-allowlist.mjs` (high/critical `npm audit`). It allowlists only GHSA-fc5q-39xc-vjpf (picomatch, no upstream fix yet); remove the allowlist once picomatch publishes a patched release (micromatch/picomatch#194).
+
 ## Security issues
 
 Please do not open a public issue for a vulnerability - use the private reporting path described
