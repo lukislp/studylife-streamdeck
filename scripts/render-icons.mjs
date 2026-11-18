@@ -17,7 +17,7 @@ const ROOT = join(__dirname, "..");
 const ICONS_DIR = join(ROOT, "assets", "icons");
 const IMGS_DIR = join(ROOT, "com.lukislp.studylife.sdPlugin", "imgs");
 
-/** StudyLife's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
+/** StudyAtrium's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
  *  CSS for the canonical hex this is copied from. */
 const BRAND_INDIGO = "#4F46E5";
 

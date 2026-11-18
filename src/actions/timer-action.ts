@@ -1,6 +1,6 @@
 // Focus Timer key: tap cycles idle -> start -> pause -> resume, long-press stops. Polls
 // TimerState.Get while visible on a device (onWillAppear/onWillDisappear) and writes through
-// TimerState.Save on a tap. The timer is a single shared StudyLife resource - not owned per key -
+// TimerState.Save on a tap. The timer is a single shared StudyAtrium resource - not owned per key -
 // so every visible instance polls and renders the same state, exactly like the web app, the tray
 // app and studylife-vscode's status bar all showing the same thing.
 //

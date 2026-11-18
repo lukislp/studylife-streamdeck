@@ -4,7 +4,7 @@
 // into that many times the request rate for no new information between them.
 //
 // Deliberately a module-level singleton, not per-action-instance state: there is exactly one
-// StudyLife connection per plugin process (see settings.ts), so one cache entry is correct
+// StudyAtrium connection per plugin process (see settings.ts), so one cache entry is correct
 // regardless of how many keys are reading it.
 import type { MetricsSummary, StudyLifeApi } from "./api.js";
 

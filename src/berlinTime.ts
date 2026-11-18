@@ -1,10 +1,10 @@
-// Europe/Berlin wall-clock helpers. StudyLife's API sends and expects every DateTime as naive
+// Europe/Berlin wall-clock helpers. StudyAtrium's API sends and expects every DateTime as naive
 // local time in the server's own timezone (Europe/Berlin) - no offset in the JSON, and NOT the
 // timezone of whatever machine happens to run this plugin. Getting this wrong silently books
 // sessions at the wrong hour (see the README, and studylife-raycast's courseGoals.ts, which uses
 // the same Intl.DateTimeFormat technique for the same reason).
 //
-// The trick used throughout this file: since every StudyLife DateTime we read or write is
+// The trick used throughout this file: since every StudyAtrium DateTime we read or write is
 // naive-Berlin, arithmetic between them never needs a real UTC instant - only a value that is
 // INTERNALLY consistent. Date.UTC(...) applied to the Berlin wall-clock's own numbers gives
 // exactly that ("pretend UTC"): two naive-Berlin instants compare and subtract correctly no
@@ -52,7 +52,7 @@ function pad(n: number): string {
 }
 
 /**
- * The naive-local ISO-ish string StudyLife's API expects for a real instant (e.g. "now") -
+ * The naive-local ISO-ish string StudyAtrium's API expects for a real instant (e.g. "now") -
  * Berlin wall-clock, no "Z", no offset. Use this for Sessions.Create's StartTime/EndTime; never
  * `new Date(ms).toISOString()`, which is UTC and silently books at the wrong hour outside UTC+0
  * (see studylife-vscode's extension.ts, which does exactly that - not ported here on purpose).
@@ -63,7 +63,7 @@ export function berlinWallClockIso(epochMs: number): string {
 }
 
 /**
- * Reads a naive-Berlin datetime string (as sent by StudyLife's API) into a "pretend UTC" instant
+ * Reads a naive-Berlin datetime string (as sent by StudyAtrium's API) into a "pretend UTC" instant
  * - see the file header. Not a real UTC instant; only ever compare it against other values built
  * the same way (this function's output, or berlinDayBoundsPretendUtc's).
  */

@@ -2,7 +2,7 @@
 // Focus Timer applies on its *next* genuine start - the same plugin-wide "current X" fallback
 // shape Switch Course gives currentCourseId, stored the same way (see settings.ts's
 // setCurrentMode). Only the built-in nine are ever offered: custom modes (id >= 100) live in the
-// user's StudyLife settings, which this plugin has no scope to read - see BUILT_IN_MODES' doc
+// user's StudyAtrium settings, which this plugin has no scope to read - see BUILT_IN_MODES' doc
 // comment.
 //
 // Keypad behaviour (any Stream Deck): a press steps the cycle by one and applies it immediately.

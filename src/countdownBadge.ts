@@ -10,7 +10,7 @@
 import { svgToDataUri } from "./svgImage.js";
 
 const SIZE = 200;
-/** StudyLife's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
+/** StudyAtrium's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
  *  CSS for the canonical hex this is copied from. */
 const ACCENT_COLOR = "#4F46E5";
 /** Due today or overdue - a distinct warning color, never the neutral brand indigo. */
