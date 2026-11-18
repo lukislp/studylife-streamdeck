@@ -1,14 +1,14 @@
 // Deciding whether a finished timer run should become a study session.
 //
 // Ported verbatim in shape from studylife-vscode's runLog.ts - see that file's header for the
-// full rationale, repeated briefly here: StudyLife's timer does not record time itself. The web
+// full rationale, repeated briefly here: StudyAtrium's timer does not record time itself. The web
 // app attaches it to a session the planner already created; the timer state carries neither a
 // course nor a start time (TimerState has sessionId, isRunning, isBreak, currentRound,
 // timerModeId and phaseEndsAt, and nothing else - see timer.ts). So a run started from this
 // plugin, with nothing planned for that slot, would otherwise run its course and book nothing.
 //
 // This plugin therefore remembers what it started and, on stop, turns it into a session - unless
-// a planned one was already attached, in which case StudyLife is already accounting for the time
+// a planned one was already attached, in which case StudyAtrium is already accounting for the time
 // and a second row would double-count it.
 import type { NewSession } from "./api.js";
 import { berlinWallClockIso } from "./berlinTime.js";
@@ -41,7 +41,7 @@ export type Decision =
 /**
  * Whether stopping now should create a session.
  *
- * `plannedSessionId` is the sessionId on the timer state as it stood at the stop - if StudyLife
+ * `plannedSessionId` is the sessionId on the timer state as it stood at the stop - if StudyAtrium
  * had a planned session attached, it is already accounting for this time.
  */
 export function decide(run: TimerRun | undefined, plannedSessionId: number | null | undefined, now: number): Decision {

@@ -1,4 +1,4 @@
-// Timer semantics, mirroring StudyLife's own TimerService and studylife-vscode's timer.ts so this
+// Timer semantics, mirroring StudyAtrium's own TimerService and studylife-vscode's timer.ts so this
 // plugin produces states the web app, Home Assistant and every other add-on already understand.
 //
 // The wire shape has no "paused" flag. Pause and stop both push isRunning: false with
@@ -142,7 +142,7 @@ export interface TransitionOptions {
    * Milliseconds left in the phase when it was paused, to resume instead of restarting.
    *
    * This has to be carried by the caller because the wire shape cannot hold it: pausing sets
-   * phaseEndsAt to null, and StudyLife's own client keeps the remainder in memory
+   * phaseEndsAt to null, and StudyAtrium's own client keeps the remainder in memory
    * (TimerService.Pause writes it to a private _secondsLeft field that is never sent). Without
    * it, "pause" is indistinguishable from "stop the clock and start over".
    */

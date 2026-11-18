@@ -13,7 +13,7 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CENTER = SIZE / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-/** StudyLife's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
+/** StudyAtrium's brand indigo - see com.lukislp.studylife.sdPlugin/ui/property-inspector.html's
  *  CSS for the canonical hex this is copied from. Used for the key's background (see
  *  background()) - never for the arc itself, since an indigo arc on an indigo background would
  *  be invisible. */

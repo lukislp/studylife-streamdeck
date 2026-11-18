@@ -1,6 +1,6 @@
 // Study Status key: shows this week's and today's hours plus streak from Metrics.GetSummary and
 // Sessions.GetHistory, refreshed periodically while visible, with an immediate refresh on a
-// press. Every number comes from StudyLife's own metrics/history endpoints - the single place
+// press. Every number comes from StudyAtrium's own metrics/history endpoints - the single place
 // those are calculated (see MetricsController, SessionsController) - so this key can never
 // quietly disagree with the web app, exactly like studylife-vscode's status bar.
 import type { JsonObject } from "@elgato/utils";
