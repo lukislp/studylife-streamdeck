@@ -231,6 +231,8 @@ leaves your machine is: the poll for timer state and metrics, timer transitions 
 pressing a key, sessions this plugin books when you stop a timer it started, and notes/course
 selections you explicitly create or pick.
 
+The full statement of what is stored, where it goes and how to remove it is in [PRIVACY.md](PRIVACY.md).
+
 ## Development
 
 ```bash
