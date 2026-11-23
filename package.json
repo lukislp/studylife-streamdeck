@@ -28,13 +28,13 @@
     "@elgato/utils": "0.7.0"
   },
   "devDependencies": {
-    "@elgato/cli": "^1.10.4",
+    "@elgato/cli": "^1.10.5",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.6.6",
     "esbuild": "^0.28.2",
-    "fast-check": "4.10.2",
+    "fast-check": "4.10.3",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "overrides": {
     "zod": "^4.6.6"
